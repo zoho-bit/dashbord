@@ -1,0 +1,1633 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+
+<title>AMUL DASHBOARD</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box
+}
+
+body{
+font-family:Arial,sans-serif;
+background:#f8f9fb
+}
+
+.header{
+position:fixed;
+top:0;
+width:100%;
+height:50px;
+background:#e61e2a;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 15px;
+z-index:2000
+}
+
+.brand{
+color:#fff;
+font-size:20px;
+font-weight:700
+}
+
+.header-actions{
+display:flex;
+align-items:center;
+gap:8px
+}
+
+.wallet-pill{
+background:#fff;
+color:#e61e2a;
+padding:7px 11px;
+border-radius:8px;
+font-weight:800;
+font-size:13px
+}
+
+.logout-btn{
+background:#fff;
+border:none;
+color:#e61e2a;
+padding:7px 14px;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer
+}
+
+.hero-top{
+background:#e61e2a;
+padding:60px 15px 10px;
+border-bottom-left-radius:30px;
+border-bottom-right-radius:30px
+}
+
+.banner-card{
+background:#fff;
+border-radius:15px;
+overflow:hidden
+}
+
+.banner-card img{
+width:100%;
+aspect-ratio:16/8;
+object-fit:cover
+}
+
+.plan-container{
+padding:15px 12px 100px
+}
+
+.plan-card{
+background:#fff;
+border-radius:18px;
+padding:12px 15px;
+margin-bottom:12px;
+position:relative;
+box-shadow:0 4px 12px rgba(0,0,0,.05);
+border:1px solid #f0f0f0
+}
+
+.days-badge{
+position:absolute;
+top:0;
+right:0;
+background:#e61e2a;
+color:#fff;
+padding:4px 12px;
+border-radius:0 18px 0 15px;
+font-size:10px;
+font-weight:700
+}
+
+.plan-layout{
+display:flex;
+align-items:flex-start;
+margin-top:8px
+}
+
+.plan-img{
+width:75px;
+height:75px;
+object-fit:cover;
+border-radius:10px
+}
+
+.plan-details{
+flex:1;
+margin-left:12px
+}
+
+.plan-name{
+font-size:16px;
+font-weight:700;
+color:#333;
+margin:0 0 8px
+}
+
+.stats-row{
+display:flex;
+justify-content:space-between
+}
+
+.stat-group span{
+display:block;
+font-size:10px;
+color:#999
+}
+
+.stat-group b{
+font-size:14px;
+color:#e61e2a
+}
+
+.price-section{
+font-size:12px;
+color:#555;
+margin-top:12px;
+display:flex;
+justify-content:space-between;
+align-items:center
+}
+
+.price-section b{
+color:#e61e2a;
+font-size:17px
+}
+
+.plan-actions{
+display:flex;
+align-items:center;
+gap:8px;
+flex-wrap:wrap
+}
+
+.btn-invest{
+background:#16a34a;
+color:#fff;
+border:none;
+padding:8px 18px;
+border-radius:8px;
+font-size:14px;
+font-weight:bold;
+cursor:pointer
+}
+
+.btn-sell{
+background:#dc2626;
+color:#fff;
+border:none;
+padding:8px 18px;
+border-radius:8px;
+font-size:14px;
+font-weight:bold;
+cursor:pointer
+}
+
+.btn-info{
+width:32px;
+height:32px;
+border:none;
+border-radius:50%;
+background:#fff4f4;
+color:#e61e2a;
+font-size:16px;
+font-weight:900;
+cursor:pointer;
+border:1px solid #ffdada
+}
+
+.invest-count{
+position:absolute;
+top:8px;
+left:12px;
+background:#e61e2a;
+color:#fff;
+padding:3px 10px;
+border-radius:12px;
+font-size:11px;
+font-weight:700
+}
+
+.total-income{
+font-size:13px;
+color:#16a34a;
+font-weight:700;
+margin-top:6px;
+line-height:1.6
+}
+
+.custom-popup{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%) translateY(-30px);
+background:#fff;
+width:90%;
+max-width:340px;
+border-radius:18px;
+padding:16px 18px;
+display:flex;
+align-items:center;
+gap:12px;
+box-shadow:0 15px 40px rgba(0,0,0,.15);
+z-index:99999;
+opacity:0;
+visibility:hidden;
+transition:.35s
+}
+
+.custom-popup.show{
+opacity:1;
+visibility:visible;
+transform:translateX(-50%) translateY(0)
+}
+
+.popup-icon{
+width:45px;
+height:45px;
+border-radius:50%;
+background:#16a34a;
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:22px;
+font-weight:bold
+}
+
+.popup-text{
+flex:1
+}
+
+.popup-title{
+font-size:15px;
+font-weight:700;
+color:#222
+}
+
+.popup-message{
+font-size:13px;
+color:#666
+}
+
+.popup-close{
+cursor:pointer;
+font-size:18px;
+color:#aaa;
+font-weight:bold
+}
+
+.classy-modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.45);
+display:none;
+align-items:center;
+justify-content:center;
+padding:20px;
+z-index:9999
+}
+
+.classy-modal.show{
+display:flex
+}
+
+.modal-content{
+width:100%;
+max-width:360px;
+background:#fff;
+border-radius:26px;
+padding:24px 20px;
+box-shadow:0 18px 50px rgba(0,0,0,.22);
+text-align:center
+}
+
+.modal-header-icon{
+width:58px;
+height:58px;
+background:#fff4f4;
+border-radius:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+margin:0 auto 12px
+}
+
+.modal-header-icon img{
+width:34px;
+height:34px
+}
+
+.modal-title{
+font-size:22px;
+font-weight:800;
+color:#202124;
+margin-bottom:5px
+}
+
+.modal-desc{
+font-size:13px;
+color:#8a8f98;
+margin-bottom:18px
+}
+
+.modal-info-box{
+background:#f8f9fb;
+border:1px solid #eef0f4;
+border-radius:18px;
+padding:12px 14px;
+text-align:left
+}
+
+.info-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid #eceff3
+}
+
+.info-row:last-child{
+border-bottom:none
+}
+
+.info-label{
+font-size:13px;
+color:#7c838e;
+font-weight:700
+}
+
+.info-value{
+font-size:14px;
+color:#e61e2a;
+font-weight:800
+}
+
+.modal-password{
+width:100%;
+border:none;
+outline:none;
+background:#f8f9fb;
+border:1px solid #eef0f4;
+border-radius:14px;
+padding:13px 14px;
+margin-top:12px;
+font-size:14px;
+font-weight:700
+}
+
+.product-info-text{
+text-align:left;
+color:#555;
+font-size:14px;
+line-height:1.5;
+background:#f8f9fb;
+border:1px solid #eef0f4;
+border-radius:16px;
+padding:14px;
+white-space:pre-wrap
+}
+
+.modal-footer{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-top:18px
+}
+
+.btn-modal-cancel,
+.btn-modal-confirm{
+border:none;
+border-radius:12px;
+padding:13px 10px;
+font-size:15px;
+font-weight:800;
+cursor:pointer
+}
+
+.btn-modal-cancel{
+background:#f0f1f4;
+color:#555
+}
+
+.btn-modal-confirm{
+background:#e61e2a;
+color:#fff
+}
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+width:100%;
+height:60px;
+background:#fff;
+display:grid;
+grid-template-columns:repeat(4,1fr);
+border-top:1px solid #f0f0f0
+}
+
+.nav-link{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+text-decoration:none;
+color:#b2bec3;
+font-size:10px;
+font-weight:600
+}
+
+.nav-link.active{
+color:#e61e2a
+}
+
+.nav-link img{
+width:22px;
+height:22px;
+margin-bottom:3px
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="custom-popup" id="popup">
+
+<div class="popup-icon" id="popupIcon">✓</div>
+
+<div class="popup-text">
+
+<div class="popup-title" id="popupTitle">
+Success
+</div>
+
+<div class="popup-message" id="popupMessage">
+Done
+</div>
+
+</div>
+
+<div class="popup-close"
+onclick="closePopup()">×</div>
+
+</div>
+
+<!-- INVEST MODAL -->
+
+<div class="classy-modal" id="classyModal">
+
+<div class="modal-content">
+
+<div class="modal-header-icon">
+
+<img src="https://img.icons8.com/material-rounded/48/e61e2a/coins.png">
+
+</div>
+
+<h3 class="modal-title">
+Invest Now
+</h3>
+
+<p class="modal-desc">
+Confirm investment
+</p>
+
+<div class="modal-info-box">
+
+<div class="info-row">
+<span class="info-label">Plan</span>
+<span class="info-value"
+id="cModalPlanName"></span>
+</div>
+
+<div class="info-row">
+<span class="info-label">Amount</span>
+<span class="info-value"
+id="cModalAmount"></span>
+</div>
+
+<div class="info-row">
+<span class="info-label">Daily</span>
+<span class="info-value"
+id="cModalDaily"></span>
+</div>
+
+<div class="info-row">
+<span class="info-label">Days</span>
+<span class="info-value"
+id="cModalCycle"></span>
+</div>
+
+</div>
+
+<input
+type="password"
+class="modal-password"
+id="cModalPassword"
+placeholder="Enter login password">
+
+<div class="modal-footer">
+
+<button
+class="btn-modal-cancel"
+onclick="closeClassyModal()">
+Back
+</button>
+
+<button
+class="btn-modal-confirm"
+id="cModalConfirmBtn">
+Confirm
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- SELL MODAL -->
+
+<div class="classy-modal" id="sellModal">
+
+<div class="modal-content">
+
+<h3 class="modal-title">
+Sell Investment
+</h3>
+
+<p class="modal-desc">
+Enter password to sell
+</p>
+
+<input
+type="password"
+class="modal-password"
+id="sellPassword"
+placeholder="Enter login password">
+
+<div class="modal-footer">
+
+<button
+class="btn-modal-cancel"
+onclick="closeSellModal()">
+Cancel
+</button>
+
+<button
+class="btn-modal-confirm"
+onclick="confirmSell()">
+Sell Now
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- PRODUCT INFO -->
+
+<div class="classy-modal" id="infoModal">
+
+<div class="modal-content">
+
+<div class="modal-header-icon">
+
+<img src="https://img.icons8.com/material-rounded/48/e61e2a/info.png">
+
+</div>
+
+<h3 class="modal-title"
+id="infoModalTitle">
+Product Info
+</h3>
+
+<div
+class="product-info-text"
+id="infoModalText">
+No Info
+</div>
+
+<div class="modal-footer"
+style="grid-template-columns:1fr">
+
+<button
+class="btn-modal-confirm"
+onclick="closeInfoModal()">
+OK
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<header class="header">
+
+<div class="brand">
+Amul
+</div>
+
+<div class="header-actions">
+
+<div class="wallet-pill">
+₹<span id="walletBalance">0</span>
+</div>
+
+<button
+class="logout-btn"
+onclick="logoutUser()">
+Logout
+</button>
+
+</div>
+
+</header>
+
+<div class="hero-top">
+
+<div class="banner-card">
+
+<img src="https://amul.codershiningstar.store/public/ccc.jpg">
+
+</div>
+
+</div>
+
+<div
+class="plan-container"
+id="planContainer">
+</div>
+
+<nav class="bottom-nav">
+
+<a href="dashbord.html"
+class="nav-link active">
+
+<img src="https://img.icons8.com/material-rounded/48/e61e2a/home.png">
+
+<span>Home</span>
+
+</a>
+
+<a href="fund.html"
+class="nav-link">
+
+<img src="https://img.icons8.com/material-rounded/48/b2bec3/bank-safe.png">
+
+<span>Fund</span>
+
+</a>
+
+<a href="team.html"
+class="nav-link">
+
+<img src="https://img.icons8.com/material-rounded/48/b2bec3/conference-call.png">
+
+<span>Team</span>
+
+</a>
+
+<a href="upmine.html"
+class="nav-link">
+
+<img src="https://img.icons8.com/material-rounded/48/b2bec3/user-male-circle.png">
+
+<span>Mine</span>
+
+</a>
+
+</nav>
+
+<script>
+
+const PROXY_URL =
+"https://fjseur.sawanenter7209.workers.dev";
+
+// ===== TEST MODE =====
+// true = 1 minute
+// false = 24 hour
+
+const TEST_MODE = false;
+
+const INCOME_INTERVAL =
+TEST_MODE
+? 60000
+: 86400000;
+
+let popupTimer;
+let selectedPlan = null;
+let sellPurchase = null;
+let allPlans = [];
+let userPurchases = {};
+
+const currentPhone =
+localStorage.getItem("phone") || "";
+
+if(!currentPhone){
+
+location.href = "login.html";
+
+}
+
+// ================= API =================
+
+async function proxyRequest(endpoint,method="GET",body=null){
+
+try{
+
+const options = {
+method,
+headers:{
+"Content-Type":"application/json"
+}
+};
+
+if(body){
+
+options.body =
+JSON.stringify(body);
+
+}
+
+const res =
+await fetch(
+PROXY_URL + endpoint,
+options
+);
+
+const text =
+await res.text();
+
+return text
+? JSON.parse(text)
+: null;
+
+}catch(e){
+
+console.log(e);
+return null;
+
+}
+
+}
+
+async function getData(path){
+
+return await proxyRequest(
+"/db/" + path
+);
+
+}
+
+async function setData(path,data){
+
+return await proxyRequest(
+"/db/" + path,
+"PUT",
+data
+);
+
+}
+
+async function pushData(path,data){
+
+return await proxyRequest(
+"/db/" + path,
+"POST",
+data
+);
+
+}
+
+function listenData(path,callback){
+
+setInterval(async()=>{
+
+const data =
+await getData(path);
+
+callback({
+val:()=>data
+});
+
+},2000);
+
+}
+
+// ================= POPUP =================
+
+function showPopup(type,title,message){
+
+clearTimeout(popupTimer);
+
+const popup =
+document.getElementById("popup");
+
+const icon =
+document.getElementById("popupIcon");
+
+document.getElementById("popupTitle")
+.innerText = title;
+
+document.getElementById("popupMessage")
+.innerText = message;
+
+if(type === "success"){
+
+icon.innerHTML = "✓";
+icon.style.background = "#16a34a";
+
+}else{
+
+icon.innerHTML = "!";
+icon.style.background = "#dc2626";
+
+}
+
+popup.classList.add("show");
+
+popupTimer = setTimeout(()=>{
+
+popup.classList.remove("show");
+
+},2500);
+
+}
+
+function closePopup(){
+
+document.getElementById("popup")
+.classList.remove("show");
+
+}
+
+// ================= USER =================
+
+function logoutUser(){
+
+localStorage.clear();
+
+location.href = "login.html";
+
+}
+
+async function findUserByPhone(phone){
+
+const users =
+await getData("users");
+
+if(!users) return null;
+
+for(let key in users){
+
+if(users[key].phone === phone){
+
+return {
+key,
+data:users[key]
+};
+
+}
+
+}
+
+return null;
+
+}
+
+// ================= WALLET =================
+
+function listenWalletBalance(){
+
+listenData(
+"demoWallet/" + currentPhone,
+
+(snap)=>{
+
+document.getElementById("walletBalance")
+.innerText =
+Number(snap.val() || 0).toFixed(2);
+
+});
+
+}
+
+// ================= DAILY INCOME =================
+
+async function processDailyIncome(){
+
+const purchases =
+await getData("purchases");
+
+if(!purchases) return;
+
+for(let key in purchases){
+
+let p = purchases[key];
+
+if(p.sold === true) continue;
+
+const startTime =
+Number(p.startTime || Date.now());
+
+const days =
+Number(p.days || 0);
+
+const dailyIncome =
+Number(p.dailyIncome || 0);
+
+const amount =
+Number(p.amount || 0);
+
+const completedDays =
+Math.floor(
+(Date.now() - startTime)
+/
+INCOME_INTERVAL
+);
+
+let creditedDays =
+Number(p.creditedDays || 0);
+
+if(completedDays > creditedDays){
+
+let addDays =
+completedDays - creditedDays;
+
+if(addDays + creditedDays > days){
+
+addDays =
+days - creditedDays;
+
+}
+
+creditedDays += addDays;
+
+p.creditedDays =
+creditedDays;
+
+p.totalIncome =
+creditedDays * dailyIncome;
+
+await setData(
+"purchases/" + key,
+p
+);
+
+}
+
+if(creditedDays >= days){
+
+const walletPath =
+"demoWallet/" + p.phone;
+
+let balance =
+Number(await getData(walletPath) || 0);
+
+const finalAmount =
+amount + Number(p.totalIncome || 0);
+
+await setData(
+walletPath,
+balance + finalAmount
+);
+
+p.sold = true;
+
+p.completedAt =
+Date.now();
+
+await setData(
+"purchases/" + key,
+p
+);
+
+}
+
+}
+
+}
+
+// ================= PURCHASES =================
+
+function listenPurchases(){
+
+listenData("purchases",(snap)=>{
+
+userPurchases = {};
+
+const data =
+snap.val() || {};
+
+Object.keys(data).forEach((k)=>{
+
+const p = data[k];
+
+if(
+p.phone === currentPhone &&
+p.sold !== true
+){
+
+if(!userPurchases[p.planKey]){
+
+userPurchases[p.planKey] = [];
+
+}
+
+userPurchases[p.planKey]
+.push({
+key:k,
+...p
+});
+
+}
+
+});
+
+renderPlans();
+
+});
+
+}
+
+// ================= LOAD PLANS =================
+
+function loadPlans(){
+
+listenData("plans",(snap)=>{
+
+allPlans = [];
+
+const data =
+snap.val() || {};
+
+Object.keys(data).forEach((k)=>{
+
+allPlans.push({
+key:k,
+...data[k]
+});
+
+});
+
+renderPlans();
+
+});
+
+}
+
+// ================= PRODUCT INFO =================
+
+window.openPlanInfo = function(planKey){
+
+const plan =
+allPlans.find(p=>p.key === planKey);
+
+if(!plan) return;
+
+document.getElementById("infoModalTitle")
+.innerText = plan.name;
+
+document.getElementById("infoModalText")
+.innerText =
+plan.info ||
+plan.description ||
+"No information available";
+
+document.getElementById("infoModal")
+.classList.add("show");
+
+};
+
+window.closeInfoModal = function(){
+
+document.getElementById("infoModal")
+.classList.remove("show");
+
+};
+
+// ================= RENDER =================
+
+function renderPlans(){
+
+const container =
+document.getElementById("planContainer");
+
+container.innerHTML = "";
+
+allPlans.forEach((plan)=>{
+
+const purchases =
+userPurchases[plan.key] || [];
+
+const count =
+purchases.length;
+
+let totalIncome = 0;
+
+purchases.forEach((p)=>{
+
+totalIncome +=
+Number(p.totalIncome || 0);
+
+});
+
+container.innerHTML += `
+
+<div class="plan-card">
+
+${count > 0
+? `
+<div class="invest-count">
+×${count} Invested
+</div>
+`
+: ""}
+
+<div class="days-badge">
+Days : ${plan.days}
+</div>
+
+<div class="plan-layout">
+
+<img
+src="${plan.image}"
+class="plan-img">
+
+<div class="plan-details">
+
+<h4 class="plan-name">
+${plan.name}
+</h4>
+
+<div class="stats-row">
+
+<div class="stat-group">
+
+<span>Daily Income</span>
+
+<b>
+₹${Number(plan.dailyIncome).toFixed(2)}
+</b>
+
+</div>
+
+<div class="stat-group">
+
+<span>Total Return</span>
+
+<b>
+₹${(
+Number(plan.dailyIncome)
+*
+Number(plan.days)
+).toFixed(2)}
+</b>
+
+</div>
+
+</div>
+
+${count > 0
+? `
+<div class="total-income">
+
+Active : ${count}
+<br>
+
+Total Income :
+₹${totalIncome.toFixed(2)}
+
+<br><br>
+
+${purchases.map((purchase,index)=>{
+
+const canSell =
+(
+Date.now()
+-
+Number(purchase.startTime || 0)
+)
+>= INCOME_INTERVAL;
+
+return `
+
+<div style="
+margin-bottom:6px;
+color:${canSell ? '#16a34a' : '#dc2626'}
+">
+
+Invest ${index + 1}
+|
+Income :
+₹${Number(
+purchase.totalIncome || 0
+).toFixed(2)}
+
+|
+${canSell
+? "Sell Ready"
+: "Sell Locked"
+}
+
+</div>
+
+`;
+
+}).join("")}
+
+</div>
+`
+: ""}
+
+<div class="price-section">
+
+<span>
+
+Price :
+
+<b>
+₹${Number(plan.price).toFixed(2)}
+</b>
+
+</span>
+
+<div class="plan-actions">
+
+<button
+class="btn-invest"
+onclick="buyPlanByKey('${plan.key}')">
+
+Invest
+
+</button>
+
+${purchases.map((purchase,index)=>{
+
+const canSell =
+(
+Date.now()
+-
+Number(purchase.startTime || 0)
+)
+>= INCOME_INTERVAL;
+
+return `
+
+<button
+class="btn-sell"
+${!canSell
+? "disabled style='opacity:.5'"
+: ""
+}
+onclick="
+${canSell
+? `openSellModal('${purchase.key}')`
+: `showPopup(
+'error',
+'Wait',
+'24 hour complete hone ke baad hi sell kar sakte ho'
+)`
+}
+">
+
+Sell ${index + 1}
+
+</button>
+
+`;
+
+}).join("")}
+
+<button
+class="btn-info"
+onclick="openPlanInfo('${plan.key}')">
+
+i
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+// ================= BUY =================
+
+window.buyPlanByKey = function(planKey){
+
+const plan =
+allPlans.find(p=>p.key === planKey);
+
+if(!plan) return;
+
+selectedPlan = plan;
+
+document.getElementById("cModalPlanName")
+.innerText = plan.name;
+
+document.getElementById("cModalAmount")
+.innerText =
+"₹" + Number(plan.price).toFixed(2);
+
+document.getElementById("cModalDaily")
+.innerText =
+"₹" + Number(plan.dailyIncome).toFixed(2);
+
+document.getElementById("cModalCycle")
+.innerText =
+plan.days;
+
+document.getElementById("cModalPassword")
+.value = "";
+
+document.getElementById("classyModal")
+.classList.add("show");
+
+};
+
+window.closeClassyModal = function(){
+
+document.getElementById("classyModal")
+.classList.remove("show");
+
+};
+
+// ================= CONFIRM BUY =================
+
+document.getElementById("cModalConfirmBtn")
+.addEventListener("click",async function(){
+
+if(!selectedPlan) return;
+
+const pass =
+document.getElementById("cModalPassword")
+.value.trim();
+
+if(!pass){
+
+return showPopup(
+"error",
+"Password",
+"Enter password"
+);
+
+}
+
+const user =
+await findUserByPhone(currentPhone);
+
+if(
+!user ||
+user.data.password !== pass
+){
+
+return showPopup(
+"error",
+"Wrong Password",
+"Invalid password"
+);
+
+}
+
+const walletPath =
+"demoWallet/" + currentPhone;
+
+let balance =
+Number(await getData(walletPath) || 0);
+
+if(balance < Number(selectedPlan.price)){
+
+return showPopup(
+"error",
+"Low Balance",
+"Insufficient balance"
+);
+
+}
+
+balance -= Number(selectedPlan.price);
+
+await setData(
+walletPath,
+balance
+);
+
+await pushData("purchases",{
+
+phone:currentPhone,
+
+planKey:selectedPlan.key,
+
+planName:selectedPlan.name,
+
+amount:Number(selectedPlan.price),
+
+dailyIncome:Number(selectedPlan.dailyIncome),
+
+days:Number(selectedPlan.days),
+
+startTime:Date.now(),
+
+creditedDays:0,
+
+totalIncome:0,
+
+sold:false
+
+});
+
+closeClassyModal();
+
+showPopup(
+"success",
+"Success",
+"Investment successful"
+);
+
+});
+
+// ================= SELL =================
+
+window.openSellModal = function(purchaseKey){
+
+sellPurchase = purchaseKey;
+
+document.getElementById("sellPassword")
+.value = "";
+
+document.getElementById("sellModal")
+.classList.add("show");
+
+};
+
+window.closeSellModal = function(){
+
+document.getElementById("sellModal")
+.classList.remove("show");
+
+};
+
+async function confirmSell(){
+
+if(!sellPurchase) return;
+
+const pass =
+document.getElementById("sellPassword")
+.value.trim();
+
+if(!pass){
+
+return showPopup(
+"error",
+"Password",
+"Enter password"
+);
+
+}
+
+const user =
+await findUserByPhone(currentPhone);
+
+if(
+!user ||
+user.data.password !== pass
+){
+
+return showPopup(
+"error",
+"Wrong Password",
+"Invalid password"
+);
+
+}
+
+const purchase =
+await getData(
+"purchases/" + sellPurchase
+);
+
+if(!purchase){
+
+return showPopup(
+"error",
+"Error",
+"Purchase not found"
+);
+
+}
+
+if(purchase.sold === true){
+
+return showPopup(
+"error",
+"Closed",
+"Already sold"
+);
+
+}
+
+const canSell =
+(
+Date.now()
+-
+Number(purchase.startTime || 0)
+)
+>= INCOME_INTERVAL;
+
+if(!canSell){
+
+return showPopup(
+"error",
+"Not Allowed",
+"24 hour complete hone ke baad hi sell kar sakte ho"
+);
+
+}
+
+const walletPath =
+"demoWallet/" + currentPhone;
+
+let balance =
+Number(await getData(walletPath) || 0);
+
+const finalAmount =
+Number(purchase.amount || 0)
++
+Number(purchase.totalIncome || 0);
+
+await setData(
+walletPath,
+balance + finalAmount
+);
+
+purchase.sold = true;
+
+purchase.manualSell = true;
+
+purchase.completedAt =
+Date.now();
+
+await setData(
+"purchases/" + sellPurchase,
+purchase
+);
+
+closeSellModal();
+
+showPopup(
+"success",
+"Sold Successfully",
+"Amount wallet me add ho gaya"
+);
+
+}
+
+// ================= START =================
+
+listenWalletBalance();
+
+listenPurchases();
+
+loadPlans();
+
+processDailyIncome();
+
+setInterval(()=>{
+
+processDailyIncome();
+
+},10000);
+
+</script>
+
+</body>
+</html>
