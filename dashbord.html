@@ -724,7 +724,7 @@ const PROXY_URL =
 // true = 1 minute
 // false = 24 hour
 
-const TEST_MODE = false;
+const TEST_MODE = true;
 
 const INCOME_INTERVAL =
 TEST_MODE
@@ -1381,100 +1381,68 @@ document.getElementById("classyModal")
 
 };
 
-// ================= CONFIRM BUY =================
-
+// ================= FIXED CONFIRM BUY =================
 document.getElementById("cModalConfirmBtn")
-.addEventListener("click",async function(){
+.addEventListener("click", async function(){
 
-if(!selectedPlan) return;
+    if(!selectedPlan) return;
 
-const pass =
-document.getElementById("cModalPassword")
-.value.trim();
+    const pass = document.getElementById("cModalPassword").value.trim();
+    if(!pass){
+        return showPopup("error", "Password", "Enter password");
+    }
 
-if(!pass){
+    const user = await findUserByPhone(currentPhone);
+    if(!user || user.data.password !== pass){
+        return showPopup("error", "Wrong Password", "Invalid password");
+    }
 
-return showPopup(
-"error",
-"Password",
-"Enter password"
-);
+    const walletPath = "demoWallet/" + currentPhone;
+    let balance = Number(await getData(walletPath) || 0);
+    const planPrice = Number(selectedPlan.price);
 
-}
+    if(balance < planPrice){
+        return showPopup("error", "Low Balance", "Insufficient balance");
+    }
 
-const user =
-await findUserByPhone(currentPhone);
+    // ================= WALLET SE PAISA KATNA =================
+    const newBalance = balance - planPrice;
 
-if(
-!user ||
-user.data.password !== pass
-){
+    // Wallet Update
+    const walletUpdated = await setData(walletPath, newBalance);
+    if(!walletUpdated){
+        return showPopup("error", "Error", "Wallet update failed");
+    }
 
-return showPopup(
-"error",
-"Wrong Password",
-"Invalid password"
-);
+    // Purchase Record Banaye
+    const purchaseData = {
+        phone: currentPhone,
+        planKey: selectedPlan.key,
+        planName: selectedPlan.name,
+        amount: planPrice,
+        dailyIncome: Number(selectedPlan.dailyIncome),
+        days: Number(selectedPlan.days),
+        startTime: Date.now(),
+        creditedDays: 0,
+        totalIncome: 0,
+        sold: false
+    };
 
-}
+    const purchaseResult = await pushData("purchases", purchaseData);
 
-const walletPath =
-"demoWallet/" + currentPhone;
+    if(!purchaseResult){
+        // Rollback - Paise wapas kar do
+        await setData(walletPath, balance);
+        return showPopup("error", "Failed", "Investment failed. Money refunded.");
+    }
 
-let balance =
-Number(await getData(walletPath) || 0);
+    // Success
+    closeClassyModal();
+    showPopup("success", "Success", "Investment successful!");
 
-if(balance < Number(selectedPlan.price)){
-
-return showPopup(
-"error",
-"Low Balance",
-"Insufficient balance"
-);
-
-}
-
-balance -= Number(selectedPlan.price);
-
-await setData(
-walletPath,
-balance
-);
-
-await pushData("purchases",{
-
-phone:currentPhone,
-
-planKey:selectedPlan.key,
-
-planName:selectedPlan.name,
-
-amount:Number(selectedPlan.price),
-
-dailyIncome:Number(selectedPlan.dailyIncome),
-
-days:Number(selectedPlan.days),
-
-startTime:Date.now(),
-
-creditedDays:0,
-
-totalIncome:0,
-
-sold:false
-
+    // Wallet Balance UI mein turant update
+    document.getElementById("walletBalance").innerText = newBalance.toFixed(2);
 });
-
-closeClassyModal();
-
-showPopup(
-"success",
-"Success",
-"Investment successful"
-);
-
-});
-
 // ================= SELL =================
 
 window.openSellModal = function(purchaseKey){
