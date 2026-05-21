@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<title>AMUL - Rewards & Bonus</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, #e61e2a 0%, #fff0f0 50%, #f8f9fa 100%);
+    min-height: 100vh;
+    padding-bottom: 90px;
+}
+
+/* Header */
+.header {
+    background: #e61e2a;
+    height: 70px;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 20px;
+    font-weight: 900;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Main Content */
+.container { padding: 20px; }
+
+.bonus-card {
+    background: white;
+    border-radius: 24px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+}
+
+.bonus-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: #1e2937;
+    margin-bottom: 12px;
+}
+
+.bonus-amount {
+    font-size: 32px;
+    font-weight: 900;
+    color: #16a34a;
+    margin: 10px 0;
+}
+
+.referral-box {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.referral-code {
+    background: rgba(255,255,255,0.2);
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin: 12px 0;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-around;
+    margin: 25px 0;
+    text-align: center;
+}
+
+.stat-item b {
+    display: block;
+    font-size: 24px;
+    color: #e61e2a;
+}
+
+.vip-levels {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 10px 0;
+}
+.vip-card {
+    background: white;
+    min-width: 140px;
+    padding: 16px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* Toast Popup */
+.custom-popup{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-40px);
+    background:#fff;width:90%;max-width:340px;border-radius:18px;padding:16px 18px;
+    display:flex;align-items:center;gap:12px;box-shadow:0 15px 40px rgba(0,0,0,.18);
+    z-index:99999;opacity:0;visibility:hidden;transition:all .4s;
+}
+.custom-popup.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+.popup-icon{width:48px;height:48px;border-radius:50%;background:#16a34a;color:#fff;display:flex;justify-content:center;align-items:center;font-size:24px;font-weight:bold;}
+.popup-text{flex:1}
+.popup-title{font-size:16px;font-weight:700;color:#222;margin-bottom:3px}
+.popup-message{font-size:13.5px;color:#555;line-height:1.4}
+.popup-close{cursor:pointer;font-size:20px;color:#aaa;font-weight:bold}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <span onclick="history.back()" style="margin-right:15px;cursor:pointer;font-size:24px;">←</span>
+    Reward & Bonus
+</div>
+
+<div class="container">
+
+    <!-- Referral Section -->
+    <div class="bonus-card referral-box">
+        <h2 style="margin-bottom:8px;">🎁 Invite Friends</h2>
+        <p>Earn ₹50 for every successful referral</p>
+        <div class="referral-code" id="referralCode">AMUL-99999992</div>
+        <button onclick="copyReferralCode()" style="background:white;color:#7c3aed;width:100%;padding:14px;border:none;border-radius:12px;font-weight:800;">Copy Referral Code</button>
+    </div>
+
+    <!-- Current Bonus Stats -->
+    <div class="bonus-card">
+        <div class="bonus-title">Your Bonus Balance</div>
+        <div class="bonus-amount" id="bonusBalance">₹245.00</div>
+        <small style="color:#16a34a;">Available to withdraw</small>
+    </div>
+
+    <!-- VIP Levels -->
+    <div class="bonus-card">
+        <div class="bonus-title">VIP Levels</div>
+        <div class="vip-levels">
+            <div class="vip-card">
+                <h3>VIP 0</h3>
+                <p style="color:#666;">Current</p>
+                <b style="color:#e61e2a;">0%</b>
+            </div>
+            <div class="vip-card" style="opacity:0.7;">
+                <h3>VIP 1</h3>
+                <p>Reach ₹5000 investment</p>
+                <b style="color:#eab308;">+5%</b>
+            </div>
+            <div class="vip-card" style="opacity:0.5;">
+                <h3>VIP 2</h3>
+                <p>Reach ₹15000 investment</p>
+                <b style="color:#eab308;">+12%</b>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bonus Types -->
+    <div class="bonus-card">
+        <div class="bonus-title">Available Bonuses</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="background:#f8fafc;padding:16px;border-radius:16px;">
+                <b>Daily Login Bonus</b><br>
+                <small>Up to ₹10 per day</small>
+            </div>
+            <div style="background:#f8fafc;padding:16px;border-radius:16px;">
+                <b>Referral Bonus</b><br>
+                <small>₹50 per successful referral</small>
+            </div>
+            <div style="background:#f8fafc;padding:16px;border-radius:16px;">
+                <b>Investment Bonus</b><br>
+                <small>Extra 2-8% on total investment</small>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast Popup -->
+<div class="custom-popup" id="toastPopup">
+    <div class="popup-icon" id="toastIcon">✓</div>
+    <div class="popup-text">
+        <div class="popup-title" id="toastTitle">Success</div>
+        <div class="popup-message" id="toastMessage">Action completed</div>
+    </div>
+    <div class="popup-close" onclick="closeToast()">×</div>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
+let currentPhone = localStorage.getItem("phone");
+
+// Toast Popup
+let toastTimer;
+function showToast(type, title, message) {
+    clearTimeout(toastTimer);
+    const popup = document.getElementById("toastPopup");
+    const icon = document.getElementById("toastIcon");
+
+    document.getElementById("toastTitle").innerText = title;
+    document.getElementById("toastMessage").innerText = message;
+
+    icon.style.background = type === "success" ? "#16a34a" : "#dc2626";
+    icon.innerHTML = type === "success" ? "✓" : "!";
+
+    popup.classList.add("show");
+    toastTimer = setTimeout(() => popup.classList.remove("show"), 2800);
+}
+window.closeToast = () => document.getElementById("toastPopup").classList.remove("show");
+
+// Copy Referral Code
+function copyReferralCode() {
+    const code = document.getElementById("referralCode").innerText;
+    navigator.clipboard.writeText(code).then(() => {
+        showToast("success", "Copied!", "Referral code copied successfully");
+    });
+}
+
+// Dummy Data (Admin can manage later)
+document.getElementById("bonusBalance").innerText = "₹245.00";
+
+// Init
+console.log("%cAMUL Reward & Bonus Page Loaded", "color:#e61e2a;font-weight:bold");
+</script>
+</body>
+</html>
