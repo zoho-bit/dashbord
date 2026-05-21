@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<title>AMUL - Send Money</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, #e61e2a 0%, #fff0f0 50%, #f8f9fa 100%);
+    min-height: 100vh;
+    padding-bottom: 90px;
+}
+
+.header {
+    background: #e61e2a;
+    height: 70px;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 20px;
+    font-weight: 900;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.card {
+    background: white;
+    border-radius: 24px;
+    padding: 25px;
+    margin: 20px 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+}
+
+.input-box {
+    width:100%; padding:16px; border:1px solid #ddd; border-radius:16px; 
+    margin-bottom:15px; font-size:16px;
+}
+
+.btn-send {
+    width:100%; padding:16px; background:linear-gradient(90deg,#10b981,#34d399);
+    color:white; border:none; border-radius:16px; font-weight:900; font-size:17px;
+    margin-top:10px; cursor:pointer;
+}
+
+.note-box {
+    background:#fef3c7;
+    border:1px solid #fcd34d;
+    color:#92400e;
+    padding:12px 15px;
+    border-radius:12px;
+    font-size:13.5px;
+    margin:15px 15px 0;
+    line-height:1.5;
+}
+
+/* Password Modal */
+.password-modal {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center;
+    z-index: 2000;
+}
+.modal-content {
+    background:white; width:90%; max-width:380px; border-radius:24px;
+    padding:25px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.3);
+}
+
+/* Error Popup */
+.error-modal {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center;
+    z-index: 2000;
+}
+.error-content {
+    background:white; width:90%; max-width:360px; border-radius:24px;
+    padding:25px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.3);
+}
+
+/* History */
+.history-card {
+    background:white; border-radius:20px; padding:18px; margin:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Toast Popup */
+.custom-popup{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-40px);
+    background:#fff;width:90%;max-width:340px;border-radius:18px;padding:16px 18px;
+    display:flex;align-items:center;gap:12px;box-shadow:0 15px 40px rgba(0,0,0,.18);
+    z-index:99999;opacity:0;visibility:hidden;transition:all .4s;
+}
+.custom-popup.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+.popup-icon{width:48px;height:48px;border-radius:50%;background:#16a34a;color:#fff;display:flex;justify-content:center;align-items:center;font-size:24px;font-weight:bold;}
+.popup-text{flex:1}
+.popup-title{font-size:16px;font-weight:700;color:#222;margin-bottom:3px}
+.popup-message{font-size:13.5px;color:#555;line-height:1.4}
+.popup-close{cursor:pointer;font-size:20px;color:#aaa;font-weight:bold}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <span onclick="history.back()" style="margin-right:15px;cursor:pointer;font-size:26px;">←</span>
+    Send Money
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom:20px;">Transfer Money</h3>
+    
+    <input type="number" id="receiverPhone" class="input-box" placeholder="Receiver Phone Number" maxlength="10">
+    <input type="number" id="amount" class="input-box" placeholder="Amount to Send" min="1">
+    
+    <button onclick="initSendMoney()" class="btn-send">
+        <i class="fa fa-paper-plane"></i> SEND MONEY
+    </button>
+</div>
+
+<!-- Note -->
+<div class="note-box">
+    <strong>Note:</strong> The recipient must have a registered account in AMUL App to receive money.<br>
+    <strong>ध्यान दें:</strong> जिस उपयोगकर्ता को पैसे भेज रहे हैं, उसका AMUL App में अकाउंट रजिस्टर्ड होना जरूरी है।
+</div>
+
+<!-- Send Money History -->
+<div style="padding:15px 15px 20px;">
+    <h3 style="margin:15px 0 10px; color:#333;">Recent Transfers</h3>
+    <div id="historyList"></div>
+</div>
+
+<!-- Password Confirmation Modal -->
+<div class="password-modal" id="passwordModal">
+    <div class="modal-content">
+        <h3>Confirm Transfer</h3>
+        <p style="margin:10px 0 20px; color:#555;">Enter your login password</p>
+        <input type="password" id="confirmPass" class="input-box" placeholder="Login Password">
+        <button onclick="confirmTransfer()" style="width:100%;padding:15px;background:#e61e2a;color:white;border:none;border-radius:16px;font-weight:900;margin-top:10px;">
+            CONFIRM SEND
+        </button>
+        <button onclick="closePasswordModal()" style="width:100%;padding:15px;background:#f1f1f1;color:#333;border:none;border-radius:16px;margin-top:8px;">
+            Cancel
+        </button>
+    </div>
+</div>
+
+<!-- Error Modal (Not Registered) -->
+<div class="error-modal" id="errorModal">
+    <div class="modal-content">
+        <h3 style="color:#ef4444;">❌ Invalid Recipient</h3>
+        <p style="margin:15px 0 25px; color:#555;">This phone number is not registered in AMUL App.</p>
+        <button onclick="closeErrorModal()" style="width:100%;padding:15px;background:#e61e2a;color:white;border:none;border-radius:16px;font-weight:900;">
+            OK
+        </button>
+    </div>
+</div>
+
+<!-- Toast Popup -->
+<div class="custom-popup" id="toastPopup">
+    <div class="popup-icon" id="toastIcon">✓</div>
+    <div class="popup-text">
+        <div class="popup-title" id="toastTitle">Success</div>
+        <div class="popup-message" id="toastMessage">Action completed</div>
+    </div>
+    <div class="popup-close" onclick="closeToast()">×</div>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
+let currentPhone = localStorage.getItem("phone");
+let pendingAmount = 0;
+let pendingReceiver = "";
+
+if(!currentPhone) location.href = "dashbord.html";
+
+// ==================== PROXY ====================
+async function getData(path) {
+    try {
+        const res = await fetch(PROXY_URL + "/db/" + path);
+        return res.ok ? await res.json() : {};
+    } catch(e) { return {}; }
+}
+
+async function setData(path, data) {
+    try {
+        await fetch(PROXY_URL + "/db/" + path, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+    } catch(e) {}
+}
+
+async function pushData(path, data) {
+    try {
+        await fetch(PROXY_URL + "/db/" + path, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+    } catch(e) {}
+}
+
+// ==================== TOAST ====================
+let toastTimer;
+function showToast(type, title, message) {
+    clearTimeout(toastTimer);
+    const popup = document.getElementById("toastPopup");
+    const icon = document.getElementById("toastIcon");
+
+    document.getElementById("toastTitle").innerText = title;
+    document.getElementById("toastMessage").innerText = message;
+
+    icon.style.background = type === "success" ? "#16a34a" : "#dc2626";
+    icon.innerHTML = type === "success" ? "✓" : "!";
+
+    popup.classList.add("show");
+    toastTimer = setTimeout(() => popup.classList.remove("show"), 2800);
+}
+window.closeToast = () => document.getElementById("toastPopup").classList.remove("show");
+
+// ==================== MODALS ====================
+function showPasswordModal(amount, receiver) {
+    pendingAmount = amount;
+    pendingReceiver = receiver;
+    document.getElementById("passwordModal").style.display = "flex";
+    document.getElementById("confirmPass").focus();
+}
+
+function closePasswordModal() {
+    document.getElementById("passwordModal").style.display = "none";
+    document.getElementById("confirmPass").value = "";
+}
+
+function showErrorModal() {
+    document.getElementById("errorModal").style.display = "flex";
+}
+
+function closeErrorModal() {
+    document.getElementById("errorModal").style.display = "none";
+}
+
+// ==================== INIT SEND MONEY ====================
+window.initSendMoney = async () => {
+    const receiver = document.getElementById("receiverPhone").value.trim();
+    const amount = Number(document.getElementById("amount").value.trim());
+
+    if (!receiver || receiver.length !== 10) 
+        return showToast("error", "Invalid Number", "Enter valid 10 digit phone number");
+
+    if (!amount || amount <= 0) 
+        return showToast("error", "Invalid Amount", "Enter valid amount");
+
+    if (receiver === currentPhone) 
+        return showToast("error", "Error", "Cannot send money to yourself");
+
+    // Check if receiver is registered
+    const users = await getData("users") || {};
+    let isRegistered = false;
+
+    for (let key in users) {
+        if (users[key].phone === receiver) {
+            isRegistered = true;
+            break;
+        }
+    }
+
+    if (!isRegistered) {
+        showErrorModal();
+        return;
+    }
+
+    // If registered → show password modal
+    showPasswordModal(amount, receiver);
+};
+
+// ==================== CONFIRM TRANSFER ====================
+window.confirmTransfer = async () => {
+    const enteredPass = document.getElementById("confirmPass").value.trim();
+    if (!enteredPass) return showToast("error", "Error", "Enter password");
+
+    const users = await getData("users") || {};
+    let valid = false;
+    for (let k in users) {
+        if (users[k].phone === currentPhone && users[k].password === enteredPass) {
+            valid = true;
+            break;
+        }
+    }
+
+    if (!valid) {
+        return showToast("error", "Wrong Password", "Incorrect login password");
+    }
+
+    closePasswordModal();
+
+    try {
+        let senderBal = Number(await getData("demoWallet/" + currentPhone) || 0);
+        if (senderBal < pendingAmount) {
+            return showToast("error", "Low Balance", "Not enough balance");
+        }
+
+        await setData("demoWallet/" + currentPhone, senderBal - pendingAmount);
+        let receiverBal = Number(await getData("demoWallet/" + pendingReceiver) || 0);
+        await setData("demoWallet/" + pendingReceiver, receiverBal + pendingAmount);
+
+        await pushData("transfers", {
+            from: currentPhone,
+            to: pendingReceiver,
+            amount: pendingAmount,
+            time: Date.now(),
+            date: new Date().toLocaleString()
+        });
+
+        showToast("success", "Success", `₹${pendingAmount} sent successfully to ${pendingReceiver}`);
+
+        document.getElementById("receiverPhone").value = "";
+        document.getElementById("amount").value = "";
+
+        loadHistory();
+
+    } catch(e) {
+        showToast("error", "Failed", "Transaction failed");
+    }
+};
+
+// ==================== LOAD HISTORY ====================
+async function loadHistory() {
+    const transfers = await getData("transfers") || {};
+    const container = document.getElementById("historyList");
+    let html = "";
+
+    Object.keys(transfers).reverse().slice(0, 10).forEach(key => {
+        const t = transfers[key];
+        if (t.from === currentPhone || t.to === currentPhone) {
+            const isSent = t.from === currentPhone;
+            html += `
+            <div class="history-card">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <strong>${isSent ? 'Sent to' : 'Received from'}</strong><br>
+                        <span style="color:#555;">${isSent ? t.to : t.from}</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <span style="color:${isSent ? '#ef4444' : '#16a34a'};font-weight:800;">
+                            ${isSent ? '-' : '+'} ₹${t.amount}
+                        </span><br>
+                        <small>${new Date(t.time).toLocaleString()}</small>
+                    </div>
+                </div>
+            </div>`;
+        }
+    });
+
+    if (!html) html = `<p style="text-align:center;color:#888;padding:30px;">No transfer history yet</p>`;
+    container.innerHTML = html;
+}
+
+// Init
+loadHistory();
+</script>
+</body>
+</html>
