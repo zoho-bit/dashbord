@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<title>AMUL - Bank & UPI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, #e61e2a 0%, #fff0f0 50%, #f8f9fa 100%);
+    min-height: 100vh;
+    padding-bottom: 90px;
+}
+
+.header {
+    background: #e61e2a;
+    height: 70px;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 20px;
+    font-weight: 900;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.tab-bar {
+    display:flex; background:white; margin:15px; border-radius:16px; padding:6px; box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+.tab {
+    flex:1; padding:14px; text-align:center; font-weight:800; border-radius:12px; cursor:pointer;
+}
+.tab.active { background:#e61e2a; color:white; }
+
+.card {
+    background:white; border-radius:24px; padding:22px; margin:15px; box-shadow:0 15px 35px rgba(0,0,0,0.12);
+}
+
+.input-box {
+    width:100%; padding:16px; border:1px solid #ddd; border-radius:16px; margin-bottom:15px; font-size:16px;
+}
+
+.saved-info {
+    background:#f0fdf4; padding:18px; border-radius:18px; border-left:5px solid #16a34a;
+}
+
+/* Center Password Modal */
+.modal {
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.75); z-index:3000; align-items:center; justify-content:center;
+}
+.modal-content {
+    background:white; width:90%; max-width:380px; border-radius:24px; padding:25px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.3);
+}
+
+/* Toast Popup (Your Original) */
+.custom-popup{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-40px);
+    background:#fff;width:90%;max-width:340px;border-radius:18px;padding:16px 18px;
+    display:flex;align-items:center;gap:12px;box-shadow:0 15px 40px rgba(0,0,0,.18);
+    z-index:99999;opacity:0;visibility:hidden;transition:all .4s;
+}
+.custom-popup.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+.popup-icon{width:48px;height:48px;border-radius:50%;background:#16a34a;color:#fff;display:flex;justify-content:center;align-items:center;font-size:24px;font-weight:bold;}
+.popup-text{flex:1}
+.popup-title{font-size:16px;font-weight:700;color:#222;margin-bottom:3px}
+.popup-message{font-size:13.5px;color:#555;line-height:1.4}
+.popup-close{cursor:pointer;font-size:20px;color:#aaa;font-weight:bold}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <span onclick="history.back()" style="margin-right:15px;cursor:pointer;font-size:24px;">←</span>
+    Bank & UPI Details
+</div>
+
+<div class="tab-bar">
+    <div class="tab active" onclick="switchTab(0)" id="tab0">Bank Account</div>
+    <div class="tab" onclick="switchTab(1)" id="tab1">UPI ID</div>
+</div>
+
+<div id="bankTab">
+    <div class="card" id="bankContent"></div>
+</div>
+
+<div id="upiTab" style="display:none;">
+    <div class="card" id="upiContent"></div>
+</div>
+
+<!-- Center Password Modal -->
+<div class="modal" id="passwordModal">
+    <div class="modal-content">
+        <h3 style="text-align:center;margin-bottom:20px;">Enter Login Password</h3>
+        <input type="password" id="verifyPassword" class="input-box" placeholder="Enter Password">
+        <button onclick="verifyPassword()" style="width:100%;padding:15px;background:#e61e2a;color:white;border:none;border-radius:16px;font-weight:900;">VERIFY</button>
+        <button onclick="closePasswordModal()" style="width:100%;padding:15px;background:#f1f1f1;color:#333;border:none;border-radius:16px;margin-top:10px;">Cancel</button>
+    </div>
+</div>
+
+<!-- Toast Popup (Your Original) -->
+<div class="custom-popup" id="toastPopup">
+    <div class="popup-icon" id="toastIcon">✓</div>
+    <div class="popup-text">
+        <div class="popup-title" id="toastTitle">Success</div>
+        <div class="popup-message" id="toastMessage">Action completed</div>
+    </div>
+    <div class="popup-close" onclick="closeToast()">×</div>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
+let currentPhone = localStorage.getItem("phone");
+let currentEditing = null; // 'bank' or 'upi'
+
+// ==================== PROXY ====================
+async function getData(path) {
+    try {
+        const res = await fetch(PROXY_URL + "/db/" + path);
+        return res.ok ? await res.json() : {};
+    } catch(e) { return {}; }
+}
+
+async function setData(path, data) {
+    try {
+        await fetch(PROXY_URL + "/db/" + path, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+    } catch(e) {}
+}
+
+// ==================== TOAST POPUP (YOUR ORIGINAL) ====================
+let toastTimer;
+function showToast(type, title, message) {
+    clearTimeout(toastTimer);
+    const popup = document.getElementById("toastPopup");
+    const icon = document.getElementById("toastIcon");
+
+    document.getElementById("toastTitle").innerText = title;
+    document.getElementById("toastMessage").innerText = message;
+
+    icon.style.background = type === "success" ? "#16a34a" : "#dc2626";
+    icon.innerHTML = type === "success" ? "✓" : "!";
+
+    popup.classList.add("show");
+    toastTimer = setTimeout(() => popup.classList.remove("show"), 2800);
+}
+window.closeToast = () => document.getElementById("toastPopup").classList.remove("show");
+
+// ==================== TAB SWITCH ====================
+function switchTab(n) {
+    document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
+    document.getElementById("bankTab").style.display = n===0 ? "block" : "none";
+    document.getElementById("upiTab").style.display = n===1 ? "block" : "none";
+    
+    if(n===0) loadBankForm();
+    if(n===1) loadUPIForm();
+}
+
+// ==================== BANK FORM ====================
+async function loadBankForm() {
+    const saved = await getData("bankAccounts/" + currentPhone) || {};
+    const content = document.getElementById("bankContent");
+
+    if(saved.bankName) {
+        content.innerHTML = `
+            <div class="saved-info">
+                <h3>Saved Bank Account</h3>
+                <p><b>Bank:</b> ${saved.bankName}</p>
+                <p><b>Account No:</b> ${saved.accountNo}</p>
+                <p><b>IFSC:</b> ${saved.ifsc}</p>
+                <button onclick="editBank()" style="margin-top:15px;width:100%;padding:14px;background:#e61e2a;color:white;border:none;border-radius:14px;font-weight:800;">Edit Bank Details</button>
+            </div>`;
+    } else {
+        content.innerHTML = `
+            <h3>Add New Bank Account</h3>
+            <input type="text" class="input-box" id="bankName" placeholder="Bank Name">
+            <input type="text" class="input-box" id="accNo" placeholder="Account Number">
+            <input type="text" class="input-box" id="ifsc" placeholder="IFSC Code">
+            <button onclick="saveBank()" style="width:100%;padding:15px;background:#e61e2a;color:white;border:none;border-radius:16px;font-weight:800;">Save Bank Account</button>`;
+    }
+}
+
+// ==================== UPI FORM ====================
+async function loadUPIForm() {
+    const saved = await getData("bankAccounts/" + currentPhone) || {};
+    const content = document.getElementById("upiContent");
+
+    if(saved.upi) {
+        content.innerHTML = `
+            <div class="saved-info">
+                <h3>Saved UPI ID</h3>
+                <p style="font-size:18px;font-weight:800;">${saved.upi}</p>
+                <button onclick="editUPI()" style="margin-top:15px;width:100%;padding:14px;background:#e61e2a;color:white;border:none;border-radius:14px;font-weight:800;">Edit UPI ID</button>
+            </div>`;
+    } else {
+        content.innerHTML = `
+            <h3>Add New UPI ID</h3>
+            <input type="text" class="input-box" id="upiId" placeholder="example@okaxis">
+            <button onclick="saveUPI()" style="width:100%;padding:15px;background:#e61e2a;color:white;border:none;border-radius:16px;font-weight:800;">Save UPI ID</button>`;
+    }
+}
+
+// ==================== EDIT WITH PASSWORD ====================
+window.editBank = () => {
+    currentEditing = 'bank';
+    document.getElementById("passwordModal").style.display = "flex";
+};
+
+window.editUPI = () => {
+    currentEditing = 'upi';
+    document.getElementById("passwordModal").style.display = "flex";
+};
+
+window.closePasswordModal = () => {
+    document.getElementById("passwordModal").style.display = "none";
+    document.getElementById("verifyPassword").value = "";
+};
+
+window.verifyPassword = async () => {
+    const enteredPass = document.getElementById("verifyPassword").value.trim();
+    if(!enteredPass) return showToast("error", "Error", "Enter password");
+
+    const users = await getData("users") || {};
+    let isValid = false;
+
+    for(let key in users) {
+        if(users[key].phone === currentPhone && users[key].password === enteredPass) {
+            isValid = true;
+            break;
+        }
+    }
+
+    if(!isValid) {
+        showToast("error", "Wrong Password", "Incorrect login password");
+        return;
+    }
+
+    closePasswordModal();
+
+    if(currentEditing === 'bank') {
+        loadBankFormForEdit();
+    } else if(currentEditing === 'upi') {
+        loadUPIFormForEdit();
+    }
+};
+
+// ==================== EDIT FORMS ====================
+async function loadBankFormForEdit() {
+    const saved = await getData("bankAccounts/" + currentPhone) || {};
+    const content = document.getElementById("bankContent");
+
+    content.innerHTML = `
+        <h3>Edit Bank Account</h3>
+        <input type="text" class="input-box" id="bankName" value="${saved.bankName || ''}" placeholder="Bank Name">
+        <input type="text" class="input-box" id="accNo" value="${saved.accountNo || ''}" placeholder="Account Number">
+        <input type="text" class="input-box" id="ifsc" value="${saved.ifsc || ''}" placeholder="IFSC Code">
+        <button onclick="updateBank()" style="width:100%;padding:15px;background:#16a34a;color:white;border:none;border-radius:16px;font-weight:800;">Update Bank Details</button>`;
+};
+
+async function loadUPIFormForEdit() {
+    const saved = await getData("bankAccounts/" + currentPhone) || {};
+    const content = document.getElementById("upiContent");
+
+    content.innerHTML = `
+        <h3>Edit UPI ID</h3>
+        <input type="text" class="input-box" id="upiId" value="${saved.upi || ''}" placeholder="example@okaxis">
+        <button onclick="updateUPI()" style="width:100%;padding:15px;background:#16a34a;color:white;border:none;border-radius:16px;font-weight:800;">Update UPI ID</button>`;
+};
+
+// ==================== UPDATE FUNCTIONS ====================
+window.updateBank = async () => {
+    const bankName = document.getElementById("bankName").value.trim();
+    const accNo = document.getElementById("accNo").value.trim();
+    const ifsc = document.getElementById("ifsc").value.trim();
+
+    if(!bankName || !accNo || !ifsc) return showToast("error", "Error", "All fields required");
+
+    let data = await getData("bankAccounts/" + currentPhone) || {};
+    data.bankName = bankName;
+    data.accountNo = accNo;
+    data.ifsc = ifsc;
+    await setData("bankAccounts/" + currentPhone, data);
+
+    showToast("success", "Updated", "Bank details updated successfully");
+    loadBankForm();
+};
+
+window.updateUPI = async () => {
+    const upi = document.getElementById("upiId").value.trim();
+    if(!upi) return showToast("error", "Error", "Enter UPI ID");
+
+    let data = await getData("bankAccounts/" + currentPhone) || {};
+    data.upi = upi;
+    await setData("bankAccounts/" + currentPhone, data);
+
+    showToast("success", "Updated", "UPI ID updated successfully");
+    loadUPIForm();
+};
+
+// Init
+switchTab(0);
+</script>
+</body>
+</html>
