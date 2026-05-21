@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<title>AMUL - Transaction Record</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, #e61e2a 0%, #fdecec 45%, #ffffff 100%);
+    min-height: 100vh;
+    padding-bottom: 80px;
+}
+
+/* Header */
+.header {
+    background: #e61e2a;
+    height: 70px;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 20px;
+    font-weight: 900;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Transaction List */
+.transaction-list { padding: 15px; }
+.transaction-card {
+    background: white;
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+.trans-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.amount { font-size: 22px; font-weight: 900; }
+.deposit { color: #16a34a; }
+.withdraw { color: #e61e2a; }
+.status {
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 900;
+}
+.pending { background:#fff3cd; color:#856404; }
+.success { background:#d4edda; color:#166534; }
+.rejected { background:#f8d7da; color:#991b1e; }
+
+/* Toast Popup */
+.custom-popup{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-40px);
+    background:#fff;width:90%;max-width:340px;border-radius:18px;padding:16px 18px;
+    display:flex;align-items:center;gap:12px;box-shadow:0 15px 40px rgba(0,0,0,.18);
+    z-index:99999;opacity:0;visibility:hidden;transition:all .4s;
+}
+.custom-popup.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+.popup-icon{width:48px;height:48px;border-radius:50%;background:#16a34a;color:#fff;display:flex;justify-content:center;align-items:center;font-size:24px;font-weight:bold;}
+.popup-text{flex:1}
+.popup-title{font-size:16px;font-weight:700;color:#222;margin-bottom:3px}
+.popup-message{font-size:13.5px;color:#555;line-height:1.4}
+.popup-close{cursor:pointer;font-size:20px;color:#aaa;font-weight:bold}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <span onclick="history.back()" style="margin-right:15px;cursor:pointer;">←</span>
+    Transaction Record
+</div>
+
+<div class="transaction-list" id="transactionList">
+    <!-- Data will load here -->
+</div>
+
+<!-- Toast Popup -->
+<div class="custom-popup" id="toastPopup">
+    <div class="popup-icon" id="toastIcon">✓</div>
+    <div class="popup-text">
+        <div class="popup-title" id="toastTitle">Success</div>
+        <div class="popup-message" id="toastMessage">Action completed</div>
+    </div>
+    <div class="popup-close" onclick="closeToast()">×</div>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
+let currentPhone = localStorage.getItem("phone");
+
+if(!currentPhone) location.href = "dashbord.html";
+
+// ==================== PROXY ====================
+async function getData(path) {
+    try {
+        const res = await fetch(PROXY_URL + "/db/" + path);
+        return res.ok ? await res.json() : {};
+    } catch(e) { return {}; }
+}
+
+// ==================== LOAD TRANSACTIONS ====================
+async function loadTransactions() {
+    const deposits = await getData("depositRequests") || {};
+    const withdrawals = await getData("withdrawRequests") || {};
+    const container = document.getElementById("transactionList");
+    let html = "";
+
+    // Deposits
+    Object.values(deposits).forEach(d => {
+        if (d.phone === currentPhone) {
+            const statusClass = d.status === "success" ? "success" : (d.status === "rejected" ? "rejected" : "pending");
+            html += `
+            <div class="transaction-card">
+                <div class="trans-header">
+                    <div>
+                        <span class="amount deposit">+ ₹${d.amount}</span><br>
+                        <small>Deposit via ${d.channel || 'UPI'}</small>
+                    </div>
+                    <span class="status ${statusClass}">${d.status.toUpperCase()}</span>
+                </div>
+                <small style="color:#666;">${d.time || 'Just now'}</small>
+            </div>`;
+        }
+    });
+
+    // Withdrawals
+    Object.values(withdrawals).forEach(w => {
+        if (w.phone === currentPhone) {
+            const statusClass = w.status === "approved" ? "success" : (w.status === "rejected" ? "rejected" : "pending");
+            html += `
+            <div class="transaction-card">
+                <div class="trans-header">
+                    <div>
+                        <span class="amount withdraw">- ₹${w.amount}</span><br>
+                        <small>Withdraw via ${w.method || 'Bank'}</small>
+                    </div>
+                    <span class="status ${statusClass}">${w.status.toUpperCase()}</span>
+                </div>
+                <small style="color:#666;">${w.time || 'Just now'}</small>
+            </div>`;
+        }
+    });
+
+    container.innerHTML = html || `<p style="text-align:center;padding:60px;color:#888;">No transactions yet</p>`;
+}
+
+// Toast Functions
+let toastTimer;
+function showToast(type, title, message) {
+    clearTimeout(toastTimer);
+    const popup = document.getElementById("toastPopup");
+    const icon = document.getElementById("toastIcon");
+
+    document.getElementById("toastTitle").innerText = title;
+    document.getElementById("toastMessage").innerText = message;
+
+    icon.style.background = type === "success" ? "#16a34a" : "#dc2626";
+    icon.innerHTML = type === "success" ? "✓" : "!";
+
+    popup.classList.add("show");
+    toastTimer = setTimeout(() => popup.classList.remove("show"), 2800);
+}
+window.closeToast = () => document.getElementById("toastPopup").classList.remove("show");
+
+// Load on start
+loadTransactions();
+setInterval(loadTransactions, 5000);
+</script>
+</body>
+</html>
