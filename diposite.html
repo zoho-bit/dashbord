@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
 <title>AMUL Recharge</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 body {
@@ -15,8 +14,6 @@ body {
     padding-bottom: 90px;
     overflow-x: hidden;
 }
-
-/* ==================== STYLES (Same as before) ==================== */
 .header {
     height: 70px;
     background: linear-gradient(90deg, #e61e2a, #ff4b5c);
@@ -50,7 +47,6 @@ body {
 }
 .hero p { font-size: 15.5px; opacity: 0.95; margin-bottom: 6px; }
 .hero h1 { font-size: 52px; font-weight: 900; letter-spacing: -1px; }
-
 .main-card {
     background: white;
     margin: -55px 15px 25px;
@@ -61,7 +57,6 @@ body {
     z-index: 10;
 }
 .title { font-size: 18px; font-weight: 900; color: #1f2937; margin-bottom: 20px; }
-
 .amount-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -87,7 +82,6 @@ body {
     border-color: #e61e2a;
     transform: scale(0.96);
 }
-
 .input-box {
     width: 100%;
     height: 62px;
@@ -100,7 +94,6 @@ body {
     outline: none;
     margin: 15px 0;
 }
-
 .main-btn {
     width: 100%;
     height: 64px;
@@ -114,7 +107,6 @@ body {
     box-shadow: 0 12px 30px rgba(230,30,42,0.35);
     margin-top: 10px;
 }
-
 .slide-page {
     position: fixed;
     top: 0; left: 100%;
@@ -125,7 +117,6 @@ body {
     overflow-y: auto;
 }
 .slide-page.active { left: 0; }
-
 .top-bar {
     height: 68px;
     background: white;
@@ -139,7 +130,6 @@ body {
     top: 0;
     z-index: 10;
 }
-
 .processing-screen {
     display: none;
     position: fixed;
@@ -153,7 +143,6 @@ body {
     text-align: center;
 }
 .processing-screen.show { display: flex; }
-
 .spinner {
     width: 85px; height: 85px;
     border: 7px solid rgba(255,255,255,0.2);
@@ -163,7 +152,6 @@ body {
     margin-bottom: 30px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
 .history-section { padding: 0 15px 20px; }
 .history-card {
     background: white;
@@ -172,7 +160,6 @@ body {
     margin-bottom: 16px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
-
 .bottom-nav {
     position: fixed;
     bottom: 0; width: 100%; height: 68px;
@@ -196,7 +183,6 @@ body {
 <body>
 
 <div class="header">AMUL Recharge</div>
-
 <div class="hero">
     <p>Main Wallet Balance</p>
     <h1 id="walletBalance">₹0</h1>
@@ -205,9 +191,7 @@ body {
 <div class="main-card">
     <div class="title">Select Recharge Amount</div>
     <div class="amount-grid" id="amountGrid"></div>
-   
     <input type="number" id="customAmount" class="input-box" placeholder="Enter Custom Amount">
-   
     <button class="main-btn" onclick="openQRPage()">PROCEED TO PAY →</button>
 </div>
 
@@ -246,9 +230,10 @@ body {
 const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
 let currentPhone = localStorage.getItem("phone") || "";
 let selectedAmount = 0;
-let currentUTR = "";
+let hasCredited = false;
+let statusInterval = null;
 
-// ==================== PROXY FUNCTIONS ====================
+// ==================== API ====================
 async function getData(path) {
     try {
         const res = await fetch(PROXY_URL + "/db/" + path);
@@ -280,7 +265,7 @@ async function pushData(path, data) {
 function showToast(message, type = "success") {
     const toast = document.createElement("div");
     toast.style.cssText = `position:fixed; top:20px; left:50%; transform:translateX(-50%);
-        background:${type==='success'?'#16a34a':'#dc2626'}; color:white; 
+        background:${type==='success'?'#16a34a':'#dc2626'}; color:white;
         padding:16px 24px; border-radius:16px; font-weight:800; z-index:99999;
         box-shadow:0 15px 35px rgba(0,0,0,0.3);`;
     toast.textContent = message;
@@ -294,11 +279,9 @@ async function loadWallet() {
     const bal = await getData("demoWallet/" + currentPhone) || 0;
     document.getElementById("walletBalance").innerText = "₹" + Number(bal).toFixed(0);
 }
-setInterval(loadWallet, 3000);
-loadWallet();
 
 // ==================== AMOUNT GRID ====================
-const amounts = [100, 200, 500, 1000, 2000, 5000, 10000];
+const amounts = [100, 200, 500, 1000, 2000, 5000];
 const grid = document.getElementById("amountGrid");
 amounts.forEach(am => {
     grid.innerHTML += `<div class="amount-btn" onclick="selectAmount(this, ${am})">₹${am}</div>`;
@@ -311,20 +294,16 @@ window.selectAmount = (el, amt) => {
     el.classList.add('active');
 };
 
-// ==================== OPEN QR PAGE (Only QR) ====================
+// ==================== OPEN QR PAGE ====================
 window.openQRPage = async () => {
     const amt = document.getElementById("customAmount").value;
     if (!amt || Number(amt) <= 0) return showToast("Please enter valid amount", "error");
 
     selectedAmount = Number(amt);
-
     const settings = await getData("paymentSettings") || {};
     const upiId = settings.upi ? settings.upi.upiId : "admin@upi";
 
-    // UPI Deep Link
     const upiLink = `upi://pay?pa=${upiId}&pn=AMUL%20Recharge&am=${selectedAmount}&cu=INR&tr=${Date.now()}`;
-
-    // QR Code using free API
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}`;
 
     const html = `
@@ -332,9 +311,7 @@ window.openQRPage = async () => {
         <img src="${qrUrl}" style="width:280px;height:280px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
         <p style="margin:20px 0 10px; font-weight:700; color:#e61e2a;">${upiId}</p>
         <small style="color:#666;">After payment, enter UTR below</small>
-        
-        <input type="text" id="utrInput" style="width:100%;height:58px;margin:25px 0;background:#f8fafc;border:none;border-radius:18px;padding:0 20px;font-size:17px;" placeholder="Enter UTR / Transaction ID">
-        
+        <input type="text" id="utrInput" maxlength="12" style="width:100%;height:58px;margin:25px 0;background:#f8fafc;border:none;border-radius:18px;padding:0 20px;font-size:17px;" placeholder="Enter 12 Digit UTR">
         <button onclick="submitProof()" style="width:100%;height:64px;background:linear-gradient(90deg,#e61e2a,#ff4b5c);color:white;border:none;border-radius:18px;font-weight:900;font-size:18px;">SUBMIT PAYMENT PROOF</button>
     `;
 
@@ -342,16 +319,29 @@ window.openQRPage = async () => {
     document.getElementById("qrPage").classList.add("active");
 };
 
-window.closeQRPage = () => {
-    document.getElementById("qrPage").classList.remove("active");
-};
+window.closeQRPage = () => document.getElementById("qrPage").classList.remove("active");
 
-// ==================== SUBMIT PROOF ====================
+// ==================== FIXED SUBMIT PROOF (With 12 Digit + Duplicate Check) ====================
 window.submitProof = async () => {
-    const utr = document.getElementById("utrInput").value.trim();
-    if (!utr) return showToast("Please enter UTR / Transaction ID", "error");
+    const utrInput = document.getElementById("utrInput");
+    const utr = utrInput.value.trim();
 
-    currentUTR = utr;
+    // === 12 DIGIT VALIDATION ===
+    if (!utr || utr.length !== 12 || isNaN(utr)) {
+        return showToast("UTR must be exactly 12 digits", "error");
+    }
+
+    // === SAME UTR ALREADY USED CHECK ===
+    const usedRequests = await getData("depositRequests") || {};
+    for (let key in usedRequests) {
+        const req = usedRequests[key];
+        if (req.phone === currentPhone && req.utr === utr) {
+            return showToast("This UTR is already used. Please enter a new UTR.", "error");
+        }
+    }
+
+    // === SUBMIT REQUEST ===
+    hasCredited = false;
 
     const requestData = {
         phone: currentPhone,
@@ -365,41 +355,43 @@ window.submitProof = async () => {
     await pushData("depositRequests", requestData);
 
     document.getElementById("qrPage").classList.remove("active");
-
-    // Show Processing Screen
     document.getElementById("processingScreen").classList.add("show");
     document.getElementById("processingMsg").innerText = "Waiting for admin approval...";
 
     startLiveStatusCheck(utr);
 };
 
-// ==================== AUTO WALLET UPDATE ====================
+// ==================== LIVE STATUS CHECK ====================
 function startLiveStatusCheck(utr) {
-    let attempts = 0;
-    const maxAttempts = 60;
+    if (statusInterval) clearInterval(statusInterval);
 
-    const interval = setInterval(async () => {
+    let attempts = 0;
+
+    statusInterval = setInterval(async () => {
+        if (hasCredited) return;
         attempts++;
+
         const requests = await getData("depositRequests") || {};
 
         for (let key in requests) {
             const req = requests[key];
             if (req.phone === currentPhone && req.utr === utr) {
-                if (req.status === "success") {
-                    clearInterval(interval);
+
+                if (req.status === "success" && !hasCredited) {
+                    hasCredited = true;
+                    clearInterval(statusInterval);
 
                     const currentBal = Number(await getData("demoWallet/" + currentPhone) || 0);
-                    const newBalance = currentBal + Number(req.amount);
-
-                    await setData("demoWallet/" + currentPhone, newBalance);
+                    await setData("demoWallet/" + currentPhone, currentBal + Number(req.amount));
 
                     document.getElementById("processingScreen").classList.remove("show");
                     showToast(`₹${req.amount} Added Successfully!`, "success");
                     loadWallet();
                     return;
-                } 
-                else if (req.status === "rejected") {
-                    clearInterval(interval);
+                }
+
+                if (req.status === "rejected") {
+                    clearInterval(statusInterval);
                     document.getElementById("processingScreen").classList.remove("show");
                     showToast("Request Rejected by Admin", "error");
                     return;
@@ -407,8 +399,8 @@ function startLiveStatusCheck(utr) {
             }
         }
 
-        if (attempts >= maxAttempts) {
-            clearInterval(interval);
+        if (attempts >= 90) {
+            clearInterval(statusInterval);
             document.getElementById("processingScreen").classList.remove("show");
             showToast("Request is under review. Check later.", "success");
         }
@@ -419,7 +411,7 @@ function startLiveStatusCheck(utr) {
 async function loadHistory() {
     const requests = await getData("depositRequests") || {};
     let html = "";
-   
+
     Object.keys(requests).reverse().forEach(key => {
         const r = requests[key];
         if (r.phone === currentPhone) {
@@ -444,6 +436,7 @@ async function loadHistory() {
 
 setInterval(loadHistory, 5000);
 loadHistory();
+loadWallet();
 
 if (!currentPhone) showToast("Please login first!", "error");
 </script>
