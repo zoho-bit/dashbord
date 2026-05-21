@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<title>AMUL Team & Referral</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+    background: #f8f9fb; 
+    min-height: 100vh; 
+    padding-bottom: 70px; 
+}
+
+.header {
+    background: linear-gradient(90deg, #e61e2a, #ff4b5c);
+    color: white; 
+    padding: 16px; 
+    font-size: 21px; 
+    font-weight: 900;
+    text-align: center; 
+    position: sticky; 
+    top: 0; 
+    z-index: 100;
+}
+
+.container { padding: 15px; }
+
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.ref-code {
+    font-size: 26px;
+    font-weight: 900;
+    color: #e61e2a;
+    text-align: center;
+    padding: 18px;
+    background: #f8fafc;
+    border-radius: 16px;
+    letter-spacing: 5px;
+    margin: 12px 0;
+}
+
+.copy-btn, .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.input-box {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.stats {
+    display: flex; 
+    justify-content: space-around; 
+    text-align: center; 
+    margin: 20px 0;
+}
+.stat-box b { font-size: 28px; color: #e61e2a; display:block; }
+
+.team-list { margin-top: 8px; }
+.team-member {
+    background: #f8fafc;
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+
+.support-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+}
+.support-btn {
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    padding: 14px 10px;
+    border-radius: 14px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 14.5px;
+    cursor: pointer;
+}
+.support-btn i { font-size: 22px; margin-bottom: 6px; display:block; }
+
+/* Original Popup */
+.custom-popup {
+    position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-30px);
+    background:#fff; width:90%; max-width:340px; border-radius:18px;
+    padding:16px 18px; display:flex; align-items:center; gap:12px;
+    box-shadow:0 15px 40px rgba(0,0,0,.15); z-index:99999;
+    opacity:0; visibility:hidden; transition:.35s;
+}
+.custom-popup.show {
+    opacity:1; visibility:visible; transform:translateX(-50%) translateY(0);
+}
+.popup-icon {
+    width:45px; height:45px; border-radius:50%; background:#16a34a; color:#fff;
+    display:flex; justify-content:center; align-items:center; font-size:22px; font-weight:bold;
+}
+.popup-text { flex:1; }
+.popup-title { font-size:15px; font-weight:700; color:#222; margin-bottom:3px; }
+.popup-message { font-size:13px; color:#666; line-height:1.4; }
+.popup-close { cursor:pointer; font-size:18px; color:#aaa; font-weight:bold; }
+
+/* Live Chat */
+.chat-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); display:none; align-items:flex-end; z-index:99999; }
+.chat-box { width:100%; max-width:420px; background:white; border-radius:20px 20px 0 0; height:82vh; display:flex; flex-direction:column; }
+.chat-header { background:#e61e2a; color:white; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; border-radius:20px 20px 0 0; }
+.chat-messages { flex:1; padding:15px; overflow-y:auto; background:#f8fafc; }
+.message { margin-bottom:12px; max-width:80%; padding:10px 14px; border-radius:18px; font-size:15px; }
+.message.admin { margin-right:auto; background:#e5e7eb; border-radius:18px 18px 18px 4px; }
+.message.user { margin-left:auto; background:#e61e2a; color:white; border-radius:18px 18px 4px 18px; }
+.chat-input { padding:12px; background:white; border-top:1px solid #eee; display:flex; gap:8px; }
+.chat-input input { flex:1; padding:14px; border:1px solid #ddd; border-radius:30px; font-size:16px; }
+.chat-input button { background:#e61e2a; color:white; border:none; width:48px; border-radius:50%; font-size:18px; }
+
+.bottom-nav {
+    position: fixed; bottom: 0; width: 100%; height: 58px;
+    background: white; display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid #eee; z-index: 9999;
+    box-shadow: 0 -3px 12px rgba(0,0,0,0.1);
+}
+.nav-link {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #94a3b8; font-size: 10px; font-weight: 700; text-decoration: none;
+}
+.nav-link.active { color: #e61e2a; }
+.nav-link i { font-size: 21px; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Original Popup -->
+<div class="custom-popup" id="popup">
+    <div class="popup-icon" id="popupIcon">✓</div>
+    <div class="popup-text">
+        <div class="popup-title" id="popupTitle">Success</div>
+        <div class="popup-message" id="popupMessage">Action completed</div>
+    </div>
+    <div class="popup-close" onclick="closePopup()">×</div>
+</div>
+
+<div class="header">AMUL Team & Referral</div>
+
+<div class="container">
+    <div class="card">
+        <h2 style="text-align:center;margin-bottom:10px;">Your Referral Code</h2>
+        <div class="ref-code" id="myRefCode">------</div>
+        <button class="copy-btn" onclick="copyReferralLink()">
+            <i class="fas fa-copy"></i> Copy Referral Link
+        </button>
+    </div>
+
+    <div class="card">
+        <h2>Enter Referral Code</h2>
+        <p style="color:#666;font-size:14px;margin-bottom:12px;">Use once to get ₹50 Bonus</p>
+        <input type="text" id="enterRefCode" class="input-box" placeholder="Enter 6 Digit Code" maxlength="6">
+        <button class="submit-btn" onclick="useReferralCode()">USE CODE & GET ₹50</button>
+    </div>
+
+    <div class="card">
+        <div class="stats">
+            <div class="stat-box"><b id="totalReferrals">0</b><br><small>Team Members</small></div>
+            <div class="stat-box"><b id="totalEarnings">₹0</b><br><small>Earnings</small></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>My Team Members</h2>
+        <div id="teamList" class="team-list"></div>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-bottom:15px;">Need Help? Contact Us</h2>
+        <div class="support-grid" id="supportGrid"></div>
+    </div>
+</div>
+
+<!-- Live Chat Modal -->
+<div class="chat-modal" id="chatModal">
+    <div class="chat-box">
+        <div class="chat-header">
+            <div><strong>Live Support</strong><br><small>Admin is Online ✅</small></div>
+            <span onclick="closeLiveChat()" style="font-size:26px;cursor:pointer;">×</span>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Type your message...">
+            <button onclick="sendChatMessage()">↑</button>
+        </div>
+    </div>
+</div>
+
+<nav class="bottom-nav">
+    <a href="dashbord.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="fund.html" class="nav-link"><i class="fas fa-wallet"></i><span>Fund</span></a>
+    <a href="team.html" class="nav-link active"><i class="fas fa-users"></i><span>Team</span></a>
+    <a href="upmine.html" class="nav-link"><i class="fas fa-user"></i><span>Mine</span></a>
+</nav>
+
+<script>
+// ==================== CONFIG ====================
+const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
+let currentPhone = localStorage.getItem("phone") || "";
+
+// ==================== POPUP ====================
+let popupTimer;
+function showPopup(type, title, message) {
+    clearTimeout(popupTimer);
+    const popup = document.getElementById("popup");
+    const icon = document.getElementById("popupIcon");
+
+    document.getElementById("popupTitle").innerText = title;
+    document.getElementById("popupMessage").innerText = message;
+
+    if (type === "success") {
+        icon.innerHTML = "✓"; 
+        icon.style.background = "#16a34a";
+    } else {
+        icon.innerHTML = "!"; 
+        icon.style.background = "#dc2626";
+    }
+
+    popup.classList.add("show");
+    popupTimer = setTimeout(() => popup.classList.remove("show"), 2800);
+}
+
+function closePopup() {
+    document.getElementById("popup").classList.remove("show");
+}
+
+// ==================== PROXY ====================
+async function getData(path) {
+    try {
+        const res = await fetch(PROXY_URL + "/db/" + path);
+        return res.ok ? await res.json() : {};
+    } catch(e) { return {}; }
+}
+
+async function setData(path, value) {
+    try {
+        await fetch(PROXY_URL + "/db/" + path, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(value)
+        });
+    } catch(e) {}
+}
+
+// ==================== TEAM & REFERRAL ====================
+async function loadTeamData() {
+    if (!currentPhone) return;
+
+    let users = await getData("users") || {};
+    let myData = Object.values(users).find(u => u.phone === currentPhone);
+
+    if (!myData?.refCode) {
+        myData = myData || {};
+        myData.refCode = Math.floor(100000 + Math.random() * 900000).toString();
+        for (let key in users) {
+            if (users[key].phone === currentPhone) {
+                users[key].refCode = myData.refCode;
+                await setData("users", users);
+                break;
+            }
+        }
+    }
+
+    document.getElementById("myRefCode").innerText = myData.refCode;
+
+    let referrals = 0, earnings = 0, html = "";
+    for (let key in users) {
+        if (users[key].ref_by === currentPhone) {
+            referrals++;
+            earnings += 100;
+            html += `
+            <div class="team-member">
+                <div><b>${users[key].phone}</b></div>
+                <span style="color:#16a34a;font-weight:900;">+₹100</span>
+            </div>`;
+        }
+    }
+
+    document.getElementById("totalReferrals").innerText = referrals;
+    document.getElementById("totalEarnings").innerText = `₹${earnings}`;
+    document.getElementById("teamList").innerHTML = html || "<p style='text-align:center;color:#888;padding:30px 0;'>No team members yet</p>";
+}
+
+// ==================== COPY REFERRAL LINK (Exact Link) ====================
+window.copyReferralLink = () => {
+    const code = document.getElementById("myRefCode").innerText.trim();
+    const link = `https://sawanpoint0000-dev.github.io/dashbord/login.html?ref=${code}`;
+    
+    navigator.clipboard.writeText(link).then(() => {
+        showPopup("success", "Link Copied Successfully!", link);
+    }).catch(() => {
+        showPopup("error", "Failed", "Please try again");
+    });
+};
+
+// ==================== USE REFERRAL CODE ====================
+// ==================== USE REFERRAL CODE (₹50 BAND KAR DIYA) ====================
+window.useReferralCode = async () => {
+    const code = document.getElementById("enterRefCode").value.trim();
+    
+    if (code.length !== 6) 
+        return showPopup("error", "Invalid Code", "Enter valid 6 digit code");
+
+    const users = await getData("users") || {};
+    let referrerPhone = null;
+    
+    for (let key in users) {
+        if (users[key].refCode === code) {
+            referrerPhone = users[key].phone;
+            break;
+        }
+    }
+
+    if (!referrerPhone) 
+        return showPopup("error", "Invalid Code", "This referral code is not valid");
+
+    if (referrerPhone === currentPhone) 
+        return showPopup("error", "Not Allowed", "You cannot use your own referral code!");
+
+    const used = await getData("usedJoiningCodes") || {};
+    
+    if (used[currentPhone]) 
+        return showPopup("error", "Already Used", "You have already used a referral code!");
+
+    // ₹50 add karne wali lines hata di gayi hain
+    used[currentPhone] = true;
+    await setData("usedJoiningCodes", used);
+
+    showPopup("success", "Success!", "Referral Code Successfully Used!");
+
+    document.getElementById("enterRefCode").value = "";
+};
+
+// ==================== SUPPORT LINKS ====================
+async function loadSupportLinks() {
+    const settings = await getData("supportSettings") || {};
+    let html = "";
+
+    if (settings.telegram) html += `<div class="support-btn" onclick="window.open('${settings.telegram}','_blank')"><i class="fab fa-telegram" style="color:#229ED9"></i> Telegram</div>`;
+    if (settings.whatsapp) html += `<div class="support-btn" onclick="window.open('${settings.whatsapp}','_blank')"><i class="fab fa-whatsapp" style="color:#25D366"></i> WhatsApp</div>`;
+    if (settings.instagram) html += `<div class="support-btn" onclick="window.open('${settings.instagram}','_blank')"><i class="fab fa-instagram" style="color:#E1306C"></i> Instagram</div>`;
+    if (settings.email) html += `<div class="support-btn" onclick="window.location.href='mailto:${settings.email}'"><i class="fas fa-envelope" style="color:#e61e2a"></i> Email</div>`;
+
+    html += `<div class="support-btn" onclick="openLiveChat()"><i class="fas fa-comments" style="color:#10b981"></i> Live Chat</div>`;
+
+    document.getElementById("supportGrid").innerHTML = html;
+}
+
+// ==================== LIVE CHAT ====================
+window.openLiveChat = () => {
+    document.getElementById("chatModal").style.display = "flex";
+    loadChatHistory();
+};
+
+window.closeLiveChat = () => document.getElementById("chatModal").style.display = "none";
+
+async function loadChatHistory() {
+    if (!currentPhone) return;
+    const chats = await getData("liveChats") || {};
+    const userChats = chats[currentPhone] || [];
+    let html = "";
+
+    userChats.forEach(m => {
+        const cls = m.from === "user" ? "user" : "admin";
+        html += `<div class="message ${cls}">${m.message}<br><small>${new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small></div>`;
+    });
+
+    const msgDiv = document.getElementById("chatMessages");
+    msgDiv.innerHTML = html || `<div style="text-align:center;color:#888;padding:50px 0;">No messages yet. Say Hello!</div>`;
+    msgDiv.scrollTop = msgDiv.scrollHeight;
+}
+
+window.sendChatMessage = async () => {
+    const input = document.getElementById("chatInput");
+    const msg = input.value.trim();
+    if (!msg || !currentPhone) return;
+
+    let chats = await getData("liveChats") || {};
+    if (!chats[currentPhone]) chats[currentPhone] = [];
+
+    chats[currentPhone].push({
+        from: "user",
+        message: msg,
+        time: Date.now()
+    });
+
+    await setData("liveChats", chats);
+    input.value = "";
+    loadChatHistory();
+};
+
+// Auto Refresh Chat
+setInterval(() => {
+    if (document.getElementById("chatModal").style.display === "flex") {
+        loadChatHistory();
+    }
+}, 2500);
+
+// ==================== INIT ====================
+if (!currentPhone) {
+    alert("Please login first!");
+    window.location.href = "login.html";
+} else {
+    loadTeamData();
+    loadSupportLinks();
+    setInterval(() => {
+        loadTeamData();
+        loadSupportLinks();
+    }, 10000);
+}
+</script>
+</body>
+</html>
