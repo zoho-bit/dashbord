@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<title>AMUL - My Profile</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, #e61e2a 0%, #fdecec 45%, #ffffff 100%);
+    min-height: 100vh;
+    padding-bottom: 90px;
+}
+
+/* Header */
+.profile-header {
+    background: #e61e2a;
+    height: 180px;
+    padding: 20px;
+    color: white;
+    text-align: center;
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(230,30,42,.3);
+}
+.header-text { font-size: 22px; font-weight: 900; margin-bottom: 20px; }
+.user-info-row { display:flex; align-items:center; padding:0 10px; }
+.logo-circle {
+    width: 78px; height: 78px; background:white; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    border:4px solid rgba(255,255,255,.4);
+}
+.logo-circle img { width:100%; height:100%; object-fit:cover; }
+.user-details { margin-left:15px; text-align:left; flex-grow:1; }
+.user-details span { font-size:12px; color:rgba(255,255,255,0.9); }
+.user-details b { font-size:18px; color:#fff; font-weight:700; }
+.vip-badge-white {
+    background:white; color:#e61e2a; padding:6px 18px; border-radius:30px;
+    font-weight:bold; font-size:12px; box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+
+/* Balance Card */
+.cards-overlay { margin:-45px 15px 20px; position:relative; z-index:5; }
+.white-balance-card {
+    background:white; border-radius:20px; padding:20px;
+    box-shadow:0 15px 30px rgba(0,0,0,0.1);
+}
+.balance-top { display:flex; justify-content:space-between; align-items:center; }
+.card-label { font-size:12px; color:#777; font-weight:700; text-transform:uppercase; }
+.card-value { font-size:28px; color:#111; font-weight:900; margin-top:4px; }
+
+/* Action Buttons */
+.action-buttons { display:flex; gap:10px; margin-top:18px; }
+.action-btn {
+    flex:1; padding:14px; border:none; border-radius:14px;
+    font-weight:800; font-size:15px; cursor:pointer; color:white;
+}
+.recharge-btn { background:linear-gradient(90deg,#e61e2a,#ff4d4d); }
+.withdraw-btn { background:linear-gradient(90deg,#2d3436,#636e72); }
+.sendmoney-btn { background:linear-gradient(90deg,#10b981,#34d399); }
+
+/* Note */
+.send-note {
+    text-align:center;
+    font-size:12.5px;
+    color:#e61e2a;
+    margin-top:8px;
+    font-weight:600;
+}
+
+/* Menu */
+.menu-list-section { padding:10px 15px 100px; }
+.menu-card-item {
+    background:white; border-radius:18px; display:flex; align-items:center;
+    justify-content:space-between; padding:16px 18px; margin-bottom:14px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.06); cursor:pointer; transition:0.3s;
+}
+.menu-card-item:active { transform:scale(0.97); }
+.menu-row-left { display:flex; align-items:center; }
+.menu-icon-box {
+    width:42px; height:42px; border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    margin-right:15px; color:white; font-size:18px;
+}
+.menu-text-label { font-size:15.5px; color:#222; font-weight:700; }
+
+/* Logout */
+.logout-btn {
+    width:100%; background:#fff; color:#e61e2a; border:2px solid #e61e2a;
+    padding:16px; border-radius:16px; font-weight:800; font-size:15px;
+    cursor:pointer; margin-top:20px;
+}
+
+/* Toast Popup */
+.custom-popup{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-40px);
+    background:#fff;width:90%;max-width:340px;border-radius:18px;padding:16px 18px;
+    display:flex;align-items:center;gap:12px;box-shadow:0 15px 40px rgba(0,0,0,.18);
+    z-index:99999;opacity:0;visibility:hidden;transition:all .4s;
+}
+.custom-popup.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+.popup-icon{width:48px;height:48px;border-radius:50%;background:#16a34a;color:#fff;display:flex;justify-content:center;align-items:center;font-size:24px;font-weight:bold;}
+.popup-text{flex:1}
+.popup-title{font-size:16px;font-weight:700;color:#222;margin-bottom:3px}
+.popup-message{font-size:13.5px;color:#555;line-height:1.4}
+.popup-close{cursor:pointer;font-size:20px;color:#aaa;font-weight:bold}
+
+/* Bottom Nav */
+.bottom-nav{position:fixed;bottom:0;width:100%;height:65px;background:white;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #f0f0f0;z-index:2000;box-shadow:0 -4px 12px rgba(0,0,0,.08);}
+.nav-link{display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#b2bec3;font-size:10px;font-weight:700;}
+.nav-link.active{color:#e61e2a;}
+.nav-link img{width:24px;height:24px;margin-bottom:4px;}
+</style>
+</head>
+<body>
+
+<div class="profile-header">
+    <div class="header-text">Profile</div>
+    <div class="user-info-row">
+        <div class="logo-circle">
+            <img src="https://amul.codershiningstar.store/public/pro.jpg" alt="Logo">
+        </div>
+        <div class="user-details">
+            <b id="userPhone">Loading...</b>
+        </div>
+        <div class="vip-badge-white" id="vipLevel">VIP 0</div>
+    </div>
+</div>
+
+<div class="cards-overlay">
+    <div class="white-balance-card">
+        <div class="balance-top">
+            <div>
+                <div class="card-label">Available Balance</div>
+                <div class="card-value" id="userBalance">₹0.00</div>
+            </div>
+        </div>
+        <div class="action-buttons">
+            <button class="action-btn recharge-btn" onclick="openRecharge()">Recharge</button>
+            <button class="action-btn withdraw-btn" onclick="openWithdraw()">Withdraw</button>
+            <button class="action-btn sendmoney-btn" onclick="openSendMoney()">
+                <i class="fa fa-paper-plane"></i> Send Money
+            </button>
+        </div>
+        <!-- Note -->
+        <div class="send-note">
+            Note: Recipient must have a registered account in AMUL App to receive money.
+        </div>
+    </div>
+</div>
+
+<div class="menu-list-section">
+    <div class="menu-card-item" onclick="window.location.href='transactions.html'">
+        <div class="menu-row-left">
+            <div class="menu-icon-box" style="background:#6c5ce7;"><i class="fas fa-history"></i></div>
+            <span class="menu-text-label">Transaction Record</span>
+        </div>
+        <i class="fa fa-chevron-right"></i>
+    </div>
+
+    <div class="menu-card-item" onclick="window.location.href='bonus.html'">
+        <div class="menu-row-left">
+            <div class="menu-icon-box" style="background:#a29bfe;"><i class="fa fa-gift"></i></div>
+            <span class="menu-text-label">Reward & Bonus</span>
+        </div>
+        <i class="fa fa-chevron-right"></i>
+    </div>
+
+    <div class="menu-card-item" onclick="window.location.href='orders.html'">
+        <div class="menu-row-left">
+            <div class="menu-icon-box" style="background:#4834d4;"><i class="fa fa-list-alt"></i></div>
+            <span class="menu-text-label">My Investments</span>
+        </div>
+        <i class="fa fa-chevron-right"></i>
+    </div>
+
+    <div class="menu-card-item" onclick="window.location.href='bank.html'">
+        <div class="menu-row-left">
+            <div class="menu-icon-box" style="background:#30336b;"><i class="fa fa-bank"></i></div>
+            <span class="menu-text-label">Bank & UPI Details</span>
+        </div>
+        <i class="fa fa-chevron-right"></i>
+    </div>
+
+    <div class="menu-card-item" onclick="window.location.href='password.html'">
+        <div class="menu-row-left">
+            <div class="menu-icon-box" style="background:#6D214F;"><i class="fa fa-lock"></i></div>
+            <span class="menu-text-label">Security Password</span>
+        </div>
+        <i class="fa fa-chevron-right"></i>
+    </div>
+</div>
+
+<div style="padding:0 15px 20px;">
+    <button class="logout-btn" onclick="logoutUser()">
+        <i class="fa fa-sign-out"></i> Logout Account
+    </button>
+</div>
+
+<!-- Toast Popup -->
+<div class="custom-popup" id="toastPopup">
+    <div class="popup-icon" id="toastIcon">✓</div>
+    <div class="popup-text">
+        <div class="popup-title" id="toastTitle">Success</div>
+        <div class="popup-message" id="toastMessage">Action completed</div>
+    </div>
+    <div class="popup-close" onclick="closeToast()">×</div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+    <a href="dashbord.html" class="nav-link"><img src="https://img.icons8.com/material-rounded/48/b2bec3/home.png"><span>Home</span></a>
+    <a href="fund.html" class="nav-link"><img src="https://img.icons8.com/material-rounded/48/b2bec3/bank-safe.png"><span>Fund</span></a>
+    <a href="team.html" class="nav-link"><img src="https://img.icons8.com/material-rounded/48/b2bec3/conference-call.png"><span>Team</span></a>
+    <a href="upmine.html" class="nav-link active"><img src="https://img.icons8.com/material-rounded/48/e61e2a/user-male-circle.png"><span>Mine</span></a>
+</nav>
+
+<script>
+// ==================== CONFIG ====================
+const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
+let currentPhone = localStorage.getItem("phone");
+
+if(!currentPhone) location.href = "dashbord.html";
+
+document.getElementById("userPhone").innerText = currentPhone;
+
+// Live Balance
+async function loadBalance() {
+    try {
+        const res = await fetch(PROXY_URL + "/db/demoWallet/" + currentPhone);
+        const bal = res.ok ? await res.json() : 0;
+        document.getElementById("userBalance").innerText = "₹" + Number(bal).toFixed(2);
+    } catch(e) {}
+}
+setInterval(loadBalance, 3000);
+loadBalance();
+
+// Toast Popup
+let toastTimer;
+function showToast(type, title, message) {
+    clearTimeout(toastTimer);
+    const popup = document.getElementById("toastPopup");
+    const icon = document.getElementById("toastIcon");
+
+    document.getElementById("toastTitle").innerText = title;
+    document.getElementById("toastMessage").innerText = message;
+
+    icon.style.background = type === "success" ? "#16a34a" : "#dc2626";
+    icon.innerHTML = type === "success" ? "✓" : "!";
+
+    popup.classList.add("show");
+    toastTimer = setTimeout(() => popup.classList.remove("show"), 2800);
+}
+window.closeToast = () => document.getElementById("toastPopup").classList.remove("show");
+
+// Navigation
+window.openRecharge = () => location.href = "diposite.html";
+window.openWithdraw = () => location.href = "withdraw.html";
+window.openSendMoney = () => location.href = "sendmoney.html";
+
+window.logoutUser = () => {
+    if(confirm("Logout from this account?")) {
+        localStorage.removeItem("phone");
+        location.href = "dashbord.html";
+    }
+};
+</script>
+</body>
+</html>
