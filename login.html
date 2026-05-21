@@ -1,0 +1,847 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<title>AMUL APP - Login</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box
+}
+
+body{
+font-family:Arial,sans-serif;
+background:#f8f9fb
+}
+
+#authPage{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px
+}
+
+.login-container{
+width:92%;
+max-width:380px;
+background:#fff;
+border-radius:40px;
+padding:30px 25px;
+box-shadow:0 15px 35px rgba(0,0,0,.05);
+text-align:center
+}
+
+.logo-box{
+background:#e62e2d;
+width:115px;
+height:115px;
+border-radius:25px;
+margin:0 auto 15px;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+box-shadow:0 8px 15px rgba(230,46,45,.2)
+}
+
+.logo-box img{
+width:85%
+}
+
+h2{
+font-size:26px;
+font-weight:800
+}
+
+.subtitle{
+color:#999;
+font-size:14px;
+margin:5px 0 20px
+}
+
+.input-group{
+margin-bottom:12px;
+background:#fff;
+border-radius:18px;
+padding:12px 18px;
+display:flex;
+align-items:center;
+box-shadow:0 5px 15px rgba(0,0,0,.04);
+border:1px solid #f2f2f2
+}
+
+.input-group input{
+border:none;
+outline:none;
+width:100%;
+font-size:16px;
+font-weight:600;
+background:transparent
+}
+
+.country-code{
+color:#ff1e1e;
+font-weight:900;
+font-size:20px;
+margin-right:10px
+}
+
+.eye-icon{
+width:22px;
+cursor:pointer;
+opacity:.5
+}
+
+.btnlogin{
+width:100%;
+background:linear-gradient(90deg,#ff1e1e,#ff4b2b);
+border:none;
+color:#fff;
+padding:16px;
+border-radius:35px;
+font-size:18px;
+font-weight:700;
+margin-top:15px;
+box-shadow:0 10px 25px rgba(255,30,30,.35);
+cursor:pointer
+}
+
+.btnlogin:disabled{
+opacity:.6;
+cursor:not-allowed
+}
+
+.switch-btn{
+margin-top:15px;
+color:#ff1e1e;
+font-weight:700;
+cursor:pointer
+}
+
+.terms-box{
+display:flex;
+align-items:flex-start;
+gap:10px;
+margin-top:15px;
+text-align:left
+}
+
+.terms-box input{
+margin-top:3px;
+accent-color:#e61e2a
+}
+
+.terms-text{
+font-size:13px;
+color:#666;
+line-height:1.5
+}
+
+.terms-text a{
+color:#e61e2a;
+font-weight:700;
+text-decoration:none
+}
+
+.password-strength{
+font-size:12px;
+margin-top:8px;
+text-align:left;
+padding-left:8px;
+font-weight:700
+}
+
+.captcha-box{
+margin-top:18px;
+background:#f8f9fb;
+padding:14px;
+border-radius:16px;
+border:1px solid #eee
+}
+
+.captcha-image{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px
+}
+
+#captchaText{
+font-size:28px;
+font-weight:900;
+letter-spacing:5px;
+color:#e61e2a;
+user-select:none;
+font-style:italic;
+transform:rotate(-2deg)
+}
+
+.refresh-btn{
+background:#fff;
+border:1px solid #ddd;
+width:42px;
+height:42px;
+border-radius:12px;
+font-size:20px;
+cursor:pointer
+}
+
+.captcha-input{
+width:100%;
+padding:13px;
+border:none;
+outline:none;
+background:#fff;
+border-radius:12px;
+font-size:15px;
+font-weight:700;
+border:1px solid #eee
+}
+
+.custom-popup{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%) translateY(-30px);
+background:#fff;
+width:90%;
+max-width:340px;
+border-radius:18px;
+padding:16px 18px;
+display:flex;
+align-items:center;
+gap:12px;
+box-shadow:0 15px 40px rgba(0,0,0,.15);
+z-index:99999;
+opacity:0;
+visibility:hidden;
+transition:.35s
+}
+
+.custom-popup.show{
+opacity:1;
+visibility:visible;
+transform:translateX(-50%) translateY(0)
+}
+
+.popup-icon{
+width:45px;
+height:45px;
+border-radius:50%;
+background:#16a34a;
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:22px;
+font-weight:bold;
+flex-shrink:0
+}
+
+.popup-text{
+flex:1
+}
+
+.popup-title{
+font-size:15px;
+font-weight:700;
+color:#222;
+margin-bottom:3px
+}
+
+.popup-message{
+font-size:13px;
+color:#666;
+line-height:1.4
+}
+
+.popup-close{
+cursor:pointer;
+font-size:18px;
+color:#aaa;
+font-weight:bold
+}
+</style>
+</head>
+
+<body>
+
+<div class="custom-popup" id="popup">
+
+    <div class="popup-icon" id="popupIcon">✓</div>
+
+    <div class="popup-text">
+
+        <div class="popup-title" id="popupTitle">
+            Success
+        </div>
+
+        <div class="popup-message" id="popupMessage">
+            Action completed
+        </div>
+
+    </div>
+
+    <div class="popup-close" onclick="closePopup()">×</div>
+
+</div>
+
+<div id="authPage">
+
+<div class="login-container">
+
+    <div class="logo-box">
+        <img src="https://amul.codershiningstar.store/images/amul_logo.png">
+    </div>
+
+    <h2 id="title">Register</h2>
+
+    <p class="subtitle" id="subtitle">
+        Join us to start your journey
+    </p>
+
+    <form id="mainForm">
+
+        <div class="input-group">
+
+            <span class="country-code">+91</span>
+
+            <input 
+            type="number"
+            id="phone"
+            placeholder="Phone Number"
+            required>
+
+        </div>
+
+        <div class="input-group">
+
+            <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required
+            oninput="checkPasswordStrength()">
+
+            <img 
+            src="https://cdn-icons-png.flaticon.com/512/709/709612.png"
+            class="eye-icon"
+            onclick="showPassword()">
+
+        </div>
+
+        <div class="password-strength" id="strengthText">
+            Password Strength : Weak
+        </div>
+
+        <!-- RE ENTER PASSWORD -->
+        <div class="input-group" id="inviteBox">
+
+            <input
+            type="password"
+            id="repassword"
+            placeholder="Re-enter Password">
+
+        </div>
+
+        <!-- TERMS -->
+        <div class="terms-box">
+
+            <input type="checkbox" id="termsCheck">
+
+            <div class="terms-text">
+                I agree to the 
+                <a href="term.html" target="_blank">
+                    Terms & Conditions
+                </a>
+            </div>
+
+        </div>
+
+        <!-- CUSTOM CAPTCHA -->
+        <div class="captcha-box">
+
+            <div class="captcha-image">
+
+                <div id="captchaText"></div>
+
+                <button type="button"
+                class="refresh-btn"
+                onclick="generateCaptcha()">
+                    ↻
+                </button>
+
+            </div>
+
+            <input
+            type="text"
+            id="captchaInput"
+            class="captcha-input"
+            placeholder="Enter Captcha">
+
+        </div>
+
+        <button class="btnlogin" type="submit" id="submitBtn">
+            REGISTER
+        </button>
+
+    </form>
+
+    <div class="switch-btn"
+    onclick="toggleMode()"
+    id="switchText">
+
+        Already have account? Login
+
+    </div>
+
+</div>
+</div>
+
+<script>
+const PROXY_URL = "https://fjseur.sawanenter7209.workers.dev";
+
+let isLogin = false;
+let popupTimer;
+let currentCaptcha = "";
+
+// ================= CAPTCHA =================
+function generateCaptcha(){
+
+    const chars =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    let captcha = "";
+
+    for(let i=0;i<5;i++){
+
+        captcha += chars.charAt(
+        Math.floor(Math.random() * chars.length)
+        );
+    }
+
+    currentCaptcha = captcha;
+
+    document.getElementById("captchaText")
+    .innerText = captcha;
+}
+
+generateCaptcha();
+
+// ================= POPUP =================
+function showPopup(type,title,message){
+
+    clearTimeout(popupTimer);
+
+    const popup =
+    document.getElementById("popup");
+
+    const icon =
+    document.getElementById("popupIcon");
+
+    document.getElementById("popupTitle")
+    .innerText = title;
+
+    document.getElementById("popupMessage")
+    .innerText = message;
+
+    if(type === "success"){
+
+        icon.innerHTML = "✓";
+        icon.style.background = "#16a34a";
+
+    }else{
+
+        icon.innerHTML = "!";
+        icon.style.background = "#dc2626";
+    }
+
+    popup.classList.add("show");
+
+    popupTimer = setTimeout(()=>{
+
+        popup.classList.remove("show");
+
+    },2500);
+}
+
+function closePopup(){
+
+    document.getElementById("popup")
+    .classList.remove("show");
+}
+
+// ================= PASSWORD SHOW =================
+function showPassword(){
+
+    let pass =
+    document.getElementById("password");
+
+    pass.type =
+    pass.type === "password"
+    ? "text"
+    : "password";
+}
+
+// ================= PASSWORD STRENGTH =================
+function checkPasswordStrength(){
+
+    const pass =
+    document.getElementById("password").value;
+
+    const strengthText =
+    document.getElementById("strengthText");
+
+    let strength = 0;
+
+    if(pass.length >= 8) strength++;
+    if(/[A-Z]/.test(pass)) strength++;
+    if(/[0-9]/.test(pass)) strength++;
+    if(/[!@#$%^&*]/.test(pass)) strength++;
+
+    if(strength <= 1){
+
+        strengthText.innerHTML =
+        "Password Strength : Weak";
+
+        strengthText.style.color = "red";
+
+    }else if(strength <= 3){
+
+        strengthText.innerHTML =
+        "Password Strength : Medium";
+
+        strengthText.style.color = "orange";
+
+    }else{
+
+        strengthText.innerHTML =
+        "Password Strength : Strong";
+
+        strengthText.style.color = "green";
+    }
+}
+
+// ================= MODE =================
+function toggleMode(){
+
+    isLogin = !isLogin;
+
+    if(isLogin){
+
+        document.getElementById("title")
+        .innerText = "Login";
+
+        document.getElementById("subtitle")
+        .innerText = "Login to continue";
+
+        document.getElementById("submitBtn")
+        .innerText = "LOGIN";
+
+        document.getElementById("inviteBox")
+        .style.display = "none";
+
+        document.getElementById("strengthText")
+        .style.display = "none";
+
+        document.getElementById("switchText")
+        .innerText = "Create new account";
+
+    }else{
+
+        document.getElementById("title")
+        .innerText = "Register";
+
+        document.getElementById("subtitle")
+        .innerText =
+        "Join us to start your journey";
+
+        document.getElementById("submitBtn")
+        .innerText = "REGISTER";
+
+        document.getElementById("inviteBox")
+        .style.display = "flex";
+
+        document.getElementById("strengthText")
+        .style.display = "block";
+
+        document.getElementById("switchText")
+        .innerText =
+        "Already have account? Login";
+    }
+}
+
+// ================= API =================
+async function proxyRequest(endpoint, method="GET", body=null){
+
+    try{
+
+        const options = {
+            method,
+            headers:{
+                "Content-Type":"application/json"
+            }
+        };
+
+        if(body){
+
+            options.body =
+            JSON.stringify(body);
+        }
+
+        const res =
+        await fetch(PROXY_URL + endpoint, options);
+
+        if(!res.ok){
+
+            throw new Error("Server Error");
+        }
+
+        const text = await res.text();
+
+        return text
+        ? JSON.parse(text)
+        : null;
+
+    }catch(e){
+
+        console.log(e);
+        return null;
+    }
+}
+
+async function getData(path){
+
+    return await proxyRequest("/db/" + path);
+}
+
+async function setData(path,data){
+
+    return await proxyRequest(
+    "/db/" + path,
+    "PUT",
+    data
+    );
+}
+
+async function pushData(path,data){
+
+    return await proxyRequest(
+    "/db/" + path,
+    "POST",
+    data
+    );
+}
+
+// ================= FIND USER =================
+async function findUserByPhone(phone){
+
+    const users = await getData("users");
+
+    if(!users) return null;
+
+    for(let key in users){
+
+        if(users[key].phone === phone){
+
+            return {
+                key,
+                data: users[key]
+            };
+        }
+    }
+
+    return null;
+}
+
+// ================= FORM =================
+document.getElementById("mainForm")
+.addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    let phone =
+    document.getElementById("phone")
+    .value.trim();
+
+    let password =
+    document.getElementById("password")
+    .value.trim();
+
+    let repassword =
+    document.getElementById("repassword")
+    .value.trim();
+
+    let captchaInput =
+    document.getElementById("captchaInput")
+    .value.trim();
+
+    const termsAccepted =
+    document.getElementById("termsCheck")
+    .checked;
+
+    if(!phone || !password){
+
+        showPopup(
+        "error",
+        "Required",
+        "Fill all fields"
+        );
+
+        return;
+    }
+
+    if(phone.length !== 10){
+
+        showPopup(
+        "error",
+        "Invalid Phone",
+        "Enter valid 10 digit phone number"
+        );
+
+        return;
+    }
+
+    // TERMS
+    if(!termsAccepted){
+
+        showPopup(
+        "error",
+        "Terms Required",
+        "Please accept Terms & Conditions"
+        );
+
+        return;
+    }
+
+    // CAPTCHA
+    if(captchaInput !== currentCaptcha){
+
+        showPopup(
+        "error",
+        "Wrong Captcha",
+        "Captcha does not match"
+        );
+
+        generateCaptcha();
+
+        return;
+    }
+
+    // REGISTER
+    if(!isLogin){
+
+        if(password.length < 8){
+
+            showPopup(
+            "error",
+            "Weak Password",
+            "Password minimum 8 characters"
+            );
+
+            return;
+        }
+
+        if(password !== repassword){
+
+            showPopup(
+            "error",
+            "Password Error",
+            "Passwords do not match"
+            );
+
+            return;
+        }
+
+        if(await findUserByPhone(phone)){
+
+            showPopup(
+            "error",
+            "Account Exists",
+            "Phone already registered"
+            );
+
+            return;
+        }
+
+        await pushData("users",{
+
+            phone,
+            password,
+            createdAt:
+            new Date().toLocaleString()
+
+        });
+
+        await setData(
+        "demoWallet/" + phone,
+        0
+        );
+
+        showPopup(
+        "success",
+        "Success",
+        "Registration completed"
+        );
+
+        generateCaptcha();
+
+        setTimeout(()=>{
+
+            toggleMode();
+
+        },1000);
+
+    }
+
+    // LOGIN
+    else{
+
+        const user =
+        await findUserByPhone(phone);
+
+        if(user &&
+        user.data.password === password){
+
+            localStorage.setItem(
+            "phone",
+            phone
+            );
+
+            showPopup(
+            "success",
+            "Login Success",
+            "Welcome back"
+            );
+
+            generateCaptcha();
+
+            setTimeout(()=>{
+
+                location.href =
+                "dashbord.html";
+
+            },1000);
+
+        }else{
+
+            showPopup(
+            "error",
+            "Login Failed",
+            "Invalid phone or password"
+            );
+
+            generateCaptcha();
+        }
+    }
+
+});
+</script>
+
+</body>
+</html>
